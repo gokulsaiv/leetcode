@@ -1,0 +1,33 @@
+// User function Template for Java
+
+class Solution {
+    public int[] bellmanFord(int V, int[][] edges, int src) {
+        // code here
+        int[] shortestDist = new int[V];
+        for(int i=0;i<V;i++)shortestDist[i]=(int)1e8;
+        shortestDist[src]=0;
+        for(int i=0;i<V;i++){
+            for(int[] e:edges){
+                int u = e[0];
+                int v = e[1];
+                int d = e[2];
+                
+                if(shortestDist[u]!=(int)1e8 && shortestDist[u]+d<shortestDist[v]){
+                    shortestDist[v] = shortestDist[u]+d;
+                }
+            }
+        }
+        for(int[] e:edges){
+                int u = e[0];
+                int v = e[1];
+                int d = e[2];
+                
+                if(shortestDist[u]!=(int)1e8 && shortestDist[u]+d<shortestDist[v]){
+                    int[] negCycle = new int[]{-1};
+                    return negCycle;
+                }
+            } 
+            
+            return shortestDist;
+    }
+}
