@@ -1,0 +1,44 @@
+class Solution {
+    public int[] dijkstra(int V, int[][] edges, int src) {
+        // code here
+        List<List<int[]>> adj_weights = new ArrayList<>();
+        int[] shortestDistances = new int[V];
+        
+        for(int i=0;i<V;i++)adj_weights.add(new ArrayList<>());
+        
+        for(int i=0;i<V;i++)shortestDistances[i]=Integer.MAX_VALUE;
+        
+        for(int i=0;i<edges.length;i++){
+            
+            int u=edges[i][0];
+            int v=edges[i][1];
+            int d=edges[i][2];
+            
+            
+            adj_weights.get(u).add(new int[]{v, d});
+            adj_weights.get(v).add(new int[]{u, d});
+            
+        }
+        
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->{
+            if(a[0]==b[0])return Integer.compare(a[1],b[1]);
+            return Integer.compare(a[0],b[0]);
+        });
+        pq.offer(new int[]{0,src});
+        shortestDistances[src]=0;
+        
+        while(!pq.isEmpty())
+        {
+            int node = pq.peek()[1];
+            int currDistance = pq.peek()[0];
+            pq.poll();
+            for(int[] x:adj_weights.get(node)){
+                if(shortestDistances[x[0]] > currDistance+x[1]){
+                    shortestDistances[x[0]] = currDistance+x[1];
+                    pq.offer(new int[]{currDistance+x[1],x[0]});
+                }
+            }
+        }
+        return shortestDistances;
+    }
+}
