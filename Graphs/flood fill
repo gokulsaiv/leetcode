@@ -1,0 +1,19 @@
+class Solution {
+    public void solver(int i, int j, int base, int color,int[][] image,boolean[][] vis){
+        vis[i][j]=true;
+        image[i][j]=color;
+        if(i!=image.length-1 && image[i+1][j]==base && !vis[i+1][j])solver(i+1,j,base,color,image,vis);
+
+        if(j!=image[0].length-1 && image[i][j+1]==base && !vis[i][j+1])solver(i,j+1,base,color,image,vis);
+
+        if(i!=0 && image[i-1][j]==base && !vis[i-1][j])solver(i-1,j,base,color,image,vis);
+
+        if(j!=0 && image[i][j-1]==base && !vis[i][j-1])solver(i,j-1,base,color,image,vis);
+    }
+    public int[][] floodFill(int[][] image, int sr, int sc, int color) {
+        int base = image[sr][sc];
+        boolean[][] vis = new boolean[image.length][image[0].length];
+        solver(sr,sc,base,color,image,vis);
+        return image;
+    }
+}
