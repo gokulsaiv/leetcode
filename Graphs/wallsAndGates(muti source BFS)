@@ -1,0 +1,50 @@
+import java.util.* ;
+import java.io.*; 
+public class Solution {
+    public static int[][] wallsAndGates(int[][] a, int n, int m) {
+        // Write you code here
+         boolean[][] vis = new  boolean[a.length][a[0].length];
+         Queue<int[]> q = new LinkedList<>();
+         for( int i =0 ; i<a.length ;i++ ){
+              for( int j =0 ; j<a[0].length ;j++ ){
+                  if(a[i][j]==0)q.offer(new int[]{i,j,0});
+                 
+              }
+         }
+         while(!q.isEmpty()){
+             int len = q.size();
+             for( int k=0;k<len;k++){
+                 int[] node =  q.poll();
+                 int i = node[0];
+                 int j = node[1];
+                 int currDist = node[2];
+                  vis[i][j] = true;
+
+                 if(i!=a.length-1 && a[i+1][j]==2147483647 && !vis[i+1][j]){
+                     vis[i+1][j]= true;
+                     a[i+1][j]= currDist + 1;
+                     q.offer(new int[]{i+1,j,a[i+1][j]});
+                 }
+
+                  if(j!=a[0].length-1 && a[i][j+1]==2147483647 && !vis[i][j+1]){
+                     vis[i][j+1]= true;
+                     a[i][j+1]= currDist + 1;
+                      q.offer(new int[]{i,j+1,a[i][j+1]});
+                 }
+
+                  if(i!=0 && a[i-1][j]==2147483647 && !vis[i-1][j]){
+                     vis[i-1][j]= true;
+                     a[i-1][j]= currDist + 1;
+                      q.offer(new int[]{i-1,j,a[i-1][j]});
+                 }
+
+                  if(j!=0 && a[i][j-1]==2147483647 && !vis[i][j-1]){
+                     vis[i][j-1]= true;
+                     a[i][j-1]= currDist + 1;
+                      q.offer(new int[]{i,j-1,a[i][j-1]});
+                 }
+             }
+         }
+         return a;
+    }
+}
