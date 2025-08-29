@@ -1,0 +1,17 @@
+CONCEPTS AND KEY DIFF BETWEEN SIMILAR TOPICS
+==============================================
+
+
+| Concept        | Dijkstra                                              | Prim                                                      |
+| -------------- | ----------------------------------------------------- | --------------------------------------------------------- |
+| Type           | Greedy algorithm                                      | Greedy algorithm                                          |
+| Data Structure | Priority Queue / Min Heap                             | Priority Queue / Min Heap                                 |
+| Core Action    | Expand the node with **minimum distance from source** | Add the edge with **minimum weight to an unvisited node** |
+| Visited Check  | Yes                                                   | Yes                                                       |
+| Updates        | Distance to a node from source                        | Cost to connect a node to the MST                         |
+
+Final Analogy:
+
+Dijkstra: Like navigating from one city to all others with the shortest travel time.
+
+Prim: Like building a network of roads to connect all cities with the least construction cost.
