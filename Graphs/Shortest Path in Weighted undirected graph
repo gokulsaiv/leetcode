@@ -1,0 +1,58 @@
+class Solution {
+    public void parentFinder(int node,Stack<Integer> s,Map<Integer,Integer> m){
+        if(node ==  -1 ) return;
+        s.push(node);
+        parentFinder(m.get(node),s,m);
+    }
+    public List<Integer> shortestPath(int n, int en, int e[][]) {
+        //  Code Here.
+        int[] dis = new int[n+1];
+        ArrayList<ArrayList<int[]>> adj = new ArrayList<>();
+        for(int i=0;i<=n;i++)adj.add(new ArrayList<>());
+        Stack<Integer> s = new Stack<>();
+        List<Integer> ans = new ArrayList<>();
+        HashMap<Integer,Integer> m = new HashMap<>();
+       
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->{
+            if(a[0]==b[0])return Integer.compare(a[1],b[1]);
+            return Integer.compare(a[0],b[0]);
+        });
+        
+        for(int i=0;i<e.length;i++){
+            int u = e[i][0];
+            int v = e[i][1];
+            int w = e[i][2];
+            
+            adj.get(u).add(new int[]{v,w});
+            adj.get(v).add(new int[]{u,w});
+            
+        }
+        for(int i=1;i<=n;i++)m.put(i,-1);
+        for(int i=0;i<=n;i++)dis[i] = Integer.MAX_VALUE;
+        pq.offer(new int[]{0,1});
+        dis[1]=0;
+       
+        while(!pq.isEmpty()){
+            int[] node = pq.poll();
+            for(int[] x : adj.get(node[1])){
+                if(dis[x[0]] > node[0] + x[1]){
+                    dis[x[0]] = node[0] + x[1];
+                    m.put(x[0],node[1]);
+                    pq.offer(new int[]{ dis[x[0]],x[0]});
+                }
+            }
+        }
+        
+        if(m.get(n)==-1){
+             ans.add(-1);
+            return ans;
+        } 
+        parentFinder(n,s,m);
+        ans.add(dis[n]);
+        while(!s.isEmpty()){
+            ans.add(s.pop());
+        }
+        
+        return ans;
+    }
+}
