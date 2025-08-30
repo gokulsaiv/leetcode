@@ -1,0 +1,74 @@
+
+class DSU{
+     int[] parent;
+     int[] size;
+    //  ArrayList<ArrayList<Integer>> //;
+        DSU(int v){
+        this.parent = new int[v];
+        this.size = new int[v];
+        // this.// = new ArrayList<>();
+        // for(int i=0; i< v; i++)//.add(new ArrayList<>());
+        Arrays.fill(this.size,1);
+        for(int i=0; i< v; i++)this.parent[i]=i;
+    }
+    
+    public int findparent(int node){
+        if(node ==  this.parent[node])return node;
+        
+        return this.parent[node] =findparent(this.parent[node]);
+    }
+    
+    public void union( int u ,  int v){
+        int uu =findparent(u);
+        int uv =findparent(v);
+        if(uu != uv) {
+            if(this.size[uu] > this.size[uv]){
+                
+            this.parent[uv] = uu ;
+            this.size[uu] = this.size[uu] + this.size[uv];
+            //.get(uu).add(uv);
+            
+        }
+        else{
+            this.parent[uu] = uv ;
+            this.size[uv] = this.size[uu] + this.size[uv];
+            //.get(uv).add(uu);
+        }
+        }
+        
+    }
+    
+    
+}
+class Solution {
+    public ArrayList<ArrayList<Integer>> getComponents(int V, int[][] edges) {
+        // code here
+        ArrayList<ArrayList<Integer>> ans =  new ArrayList<>();
+        Map<Integer,ArrayList<Integer>> comp = new HashMap<>();
+        DSU dsu = new DSU(V);
+        for( int i =0 ;i < edges.length ; i++){
+            int u = edges[i][0];
+            int v = edges[i][1];
+
+            if(dsu.findparent(u) != dsu.findparent(v)){
+                dsu.union(u,v);
+            }
+        }
+        
+        for(int i=0; i< V; i++)dsu.findparent(i);
+        for(int i=0; i< V; i++){
+            if(!comp.containsKey(dsu.parent[i])){
+                 comp.put(dsu.parent[i],new ArrayList<>());
+            }
+            
+            comp.get(dsu.parent[i]).add(i);
+        }
+        
+        for(ArrayList<Integer> c : comp.values()){
+            ans.add(c);
+        }
+      
+      return ans;
+        
+    }
+}
