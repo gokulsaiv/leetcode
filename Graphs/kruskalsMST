@@ -1,0 +1,60 @@
+// User function Template for Java
+class DSU{
+     int[] parent;
+     int[] size;
+        DSU(int v){
+        this.parent = new int[v];
+        this.size = new int[v];
+        Arrays.fill(this.size,1);
+        for(int i=0; i< v; i++)this.parent[i]=i;
+    }
+    
+    public int findparent(int node){
+        if(node ==  this.parent[node])return node;
+        
+        return this.parent[node] =findparent(this.parent[node]);
+    }
+    
+    public void union( int u ,  int v){
+        int uu =findparent(u);
+        int uv =findparent(v);
+        if(uu != uv) {
+            if(this.size[uu] > this.size[uv]){
+            this.parent[uv] = uu ;
+            this.size[uu] = this.size[uu] + this.size[uv];
+        }
+        else{
+            this.parent[uu] = uv ;
+            this.size[uv] = this.size[uu] + this.size[uv];
+        }
+        }
+        
+    }
+    
+    
+}
+class Solution {
+    static int kruskalsMST(int V, int[][] e) {
+        // code here\
+        DSU dsu = new DSU(V);
+       
+        int sum =0;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->{
+            return Integer.compare(a[2],b[2]);
+        });
+        for( int i =0 ;i< e.length ;i++)pq.offer(e[i]);
+        
+        while(!pq.isEmpty()){
+            int[] edge = pq.poll();
+            int u = edge[0];
+            int v = edge[1];
+            int w =  edge[2];
+            if(dsu.findparent(u) != dsu.findparent(v)){
+                sum = sum + w;
+                dsu.union(u,v);
+            }
+        }
+        return sum;
+        
+    }
+}
