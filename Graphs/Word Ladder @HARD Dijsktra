@@ -1,0 +1,53 @@
+class Node{
+    int d;
+    
+    String s;
+
+    Node(int dis,String str){
+        this.d = dis;
+       
+        this.s = str;
+    }
+}
+class Solution {
+    public boolean charDiff(String s1,String s2){
+        int c=0;
+        for(int i=0;i<s1.length();i++){
+            if(s1.charAt(i)!=s2.charAt(i))c++;
+        }
+        return c==1 || c ==0 ? true:false;
+    }
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        Map<String,Integer> adj = new HashMap<>();
+        Map<String,Integer> dist = new HashMap<>();
+        PriorityQueue<Node> pq= new PriorityQueue<>((a,b)->{
+            return Integer.compare(a.d,b.d);
+        });
+
+        for(int i=0;i<wordList.size();i++){
+            adj.put(wordList.get(i),i);
+             dist.put(wordList.get(i),Integer.MAX_VALUE);
+        }
+        if(!adj.containsKey(endWord))return 0;
+
+        
+       
+        pq.offer(new Node(0,beginWord));
+        while(!pq.isEmpty()){
+            Node node = pq.poll();
+            int currD = node.d;
+            String currS = node.s;
+            
+            for(int i=0;i<wordList.size();i++){
+                if(!currS.equals(wordList.get(i)) && charDiff(currS,wordList.get(i)) && dist.get(wordList.get(i)) > currD + 1){
+                    dist.put(wordList.get(i),currD + 1);
+                    pq.offer(new Node(currD + 1,wordList.get(i)));
+                }
+            }
+
+        }
+
+        return dist.get(endWord) == Integer.MAX_VALUE? 0 :  dist.get(endWord)+1;
+
+    }
+}
