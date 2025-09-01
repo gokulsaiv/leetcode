@@ -1,0 +1,35 @@
+class Solution {
+    public int networkDelayTime(int[][] times, int n, int k) {
+        
+        int[] dis = new int[n+1];
+        Arrays.fill(dis,Integer.MAX_VALUE);
+        dis[k] = 0;
+        dis[0] = 0 ;
+        for(int l=1 ; l < n ; l++){
+            for(int i=0 ;i < times.length; i++){
+            int u = times[i][0];
+             int v = times[i][1];
+              int w = times[i][2];
+
+            if(dis[u]!=Integer.MAX_VALUE){
+                //System.out.println(dis[v]  + " " + dis[u] + w);
+                if(dis[v] > dis[u] + w){
+                    dis[v] = dis[u] + w;
+                    //System.out.println( dis[v]);
+                }
+            }
+        }
+           
+        }
+        int max = Integer.MIN_VALUE;
+        for(int i=0 ;i < dis.length; i++){
+            //System.out.println(dis[i]);
+            if(dis[i]==Integer.MAX_VALUE){
+                max = -1;
+                break;
+            }
+            if(dis[i]!=Integer.MAX_VALUE && dis[i]>max)max = dis[i];
+        }
+        return max;
+    }
+}
