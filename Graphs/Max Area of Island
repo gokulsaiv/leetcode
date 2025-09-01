@@ -1,0 +1,28 @@
+class Solution {
+    public void maxArearOfIslandSolver(int i,int j,int[][] grid,int[] ans,Boolean[][] vis){
+        ans[0]++;
+        vis[i][j]=true;
+        if(i!=grid.length-1 && grid[i+1][j]==1 && vis[i+1][j]==null)maxArearOfIslandSolver(i+1,j,grid,ans,vis);
+        if(j!=grid[0].length-1 && grid[i][j+1]==1 && vis[i][j+1]==null)maxArearOfIslandSolver(i,j+1,grid,ans,vis);
+        if(i!=0 && grid[i-1][j]==1 && vis[i-1][j]==null)maxArearOfIslandSolver(i-1,j,grid,ans,vis);
+        if(j!=0 && grid[i][j-1]==1 && vis[i][j-1]==null)maxArearOfIslandSolver(i,j-1,grid,ans,vis);
+        return;
+    }
+    public int maxAreaOfIsland(int[][] grid) {
+        Boolean[][] vis = new Boolean[grid.length][grid[0].length];
+        int[] ans = new int[1];
+        int max =0;
+        // for(int i=0 ;i<grid.length;i++)Arrays.fill(vis[i],false);
+        for(int i=0 ;i<grid.length;i++){
+            for(int j=0;j<grid[0].length;j++){
+
+               if(grid[i][j]==1 && vis[i][j]==null){
+                 maxArearOfIslandSolver(i,j,grid,ans,vis);
+                 max = Math.max(max,ans[0]);
+                 ans[0]=0;
+               }
+            }
+        }
+        return max;
+    }
+}
