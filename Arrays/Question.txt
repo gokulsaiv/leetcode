@@ -1,0 +1,74 @@
+==== ARRAY MASTER LIST FOR SDE-1 INTERVIEWS ====
+
+🟩 Part 0: Most Important / Top Interview Problems
+
+- Two Sum Problem (HashMap)
+- 4-Sum Problem (Sorting + Two Pointer)
+- Longest Consecutive Sequence (HashSet Trick)
+- Largest Subarray with Sum K (Prefix Sum / HashMap)
+- Count Number of Subarrays with XOR K (Prefix XOR + HashMap)
+- Longest Substring Without Repeating Characters (Sliding Window + Set)
+
+🟦 Part 1: Basic Tricks, Traversals & In-Place
+
+- Set Matrix Zeros (Marking rows/cols in place)
+- Sort 0s, 1s, and 2s (Dutch National Flag)
+- Move Zeroes (Two Pointers)
+- Rotate Matrix 90° (Transpose + Reverse Rows)
+- Merge Two Sorted Arrays Without Extra Space (Gap Method)
+- Spiral Matrix (Directional Simulation)
+- Merge Overlapping Intervals (Sorting + Merging)
+- Next Permutation (Lexicographical Permutation Logic)
+- Pascal’s Triangle (Combinatorics + 2D Array)
+
+🟦 Part 2: Subarrays – Sums, Maximums, Products
+
+- Kadane’s Algorithm (Max Subarray Sum)
+- Maximum Product Subarray (Kadane Variant)
+- Subarray Sum Equals K (Prefix Sum + HashMap)
+- Longest Subarray with Given Sum K (Positive Integers) (Sliding Window)
+- Minimum Size Subarray Sum (Sliding Window)
+- Maximum Sum Subarray of Size K (Fixed Window)
+
+🟦 Part 3: Sliding Window / Two Pointer Strings
+
+- Longest Substring Without Repeating Characters (Sliding Window)
+- Minimum Window Substring (Sliding Window + HashMap)
+- Fruit Into Baskets (Longest Subarray with 2 Distinct Elements)
+- Longest Substring with At Most K Zeros Flipped (Sliding Window)
+
+🟦 Part 4: Binary Search & Search Variants
+
+- Search in a 2D Matrix (Binary Search)
+- First and Last Position of Element in Sorted Array (Binary Search)
+- Kth Missing Positive Number (Binary Search on Index)
+- Pow(x, n) (Fast Exponentiation)
+- Median of Two Sorted Arrays (Binary Search on Partitions)
+
+🟦 Part 5: Bit Manipulation in Arrays
+
+- Single Number (XOR Trick)
+- Single Number II (Bit Counting)
+
+🟦 Part 6: Count-Based & Math-Based
+
+- Find Duplicate in Array of N+1 (Floyd’s Cycle Detection)
+- Repeat and Missing Number (Math + XOR)
+- First Missing Positive (Index Marking / Bucket Sort)
+- Majority Element (> n/2) (Boyer-Moore Voting)
+- Majority Element (> n/3) (Extended Voting)
+- Grid Unique Paths (Combinatorics / DP)
+
+🟦 Part 7: Advanced Counting Problems
+
+- Inversion Count in Array (Merge Sort with Count)
+- Reverse Pairs (Leetcode Hard – Count pairs i < j where i < j and nums[i] > 2 * nums[j])
+
+🟦 Part 8: Greedy & Company-Specific Tricks
+
+- Stock Buy and Sell (Greedy - Track Min Price)
+- Jump Game I (Greedy - Max Reach)
+- Jump Game II (Greedy - Jumps Counter)
+- Gas Station (Greedy - Circular Array)
+- Product of Array Except Self (Prefix-Suffix Product)
+
