@@ -1,0 +1,14 @@
+class Solution {
+    public int getSecondLargest(int[] arr) {
+        // code here
+        int m1=0,m2=0;
+        for( int i: arr){
+            if(i>m1){
+                m2=m1;
+                m1=i;            }
+            if( i<m1 && i > m2)m2=i;
+            
+        }
+        return m2 == 0 ? -1 : m2;
+    }
+}
