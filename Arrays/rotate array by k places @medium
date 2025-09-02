@@ -1,0 +1,22 @@
+class Solution {
+    public void rotate(int[] nums, int k) {
+        int K = k % nums.length;
+        if(nums.length==1 && k>=1)return;
+        int[] t = new int[K+1];
+        int idx =0;
+        for(int i=nums.length - K;i<nums.length;i++){
+            t[idx]=nums[i];
+            idx++;
+            }        
+        int i =nums.length-1;
+        for( int j  = nums.length - K -1 ; j>= 0 ; j--){
+            nums[i] = nums[j];
+            i--;
+        }
+
+         i=0;
+        for( int j =0 ; j < K ;j++)nums[j]=t[j];
+      
+
+    }
+}
