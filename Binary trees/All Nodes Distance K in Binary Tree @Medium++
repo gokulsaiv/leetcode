@@ -1,0 +1,64 @@
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    int treeMax = Integer.MIN_VALUE;
+    public void calculateTreeMax(TreeNode root){
+        if(root==null)return;
+        else{
+           treeMax = Math.max(treeMax,root.val);
+        }
+        calculateTreeMax(root.left);
+        calculateTreeMax(root.right);
+    }
+    public void contructAdjList(TreeNode root, List<List<Integer>> adj){
+        if(root==null)return;
+        if(root.left == null && root.right == null)return;
+        if(root.left!=null){
+            adj.get(root.val).add(root.left.val);
+            adj.get(root.left.val).add(root.val);
+
+        }
+        if(root.right!=null){
+            adj.get(root.val).add(root.right.val);
+            adj.get(root.right.val).add(root.val);
+
+        }
+        contructAdjList(root.left,adj);
+        contructAdjList(root.right,adj);
+        
+    }
+    public List<Integer> distanceK(TreeNode root, TreeNode target, int k) {
+        List<List<Integer>> adj = new ArrayList<>();
+        List<Integer> result = new ArrayList<>();
+        calculateTreeMax(root);
+        for(int i=0;i<treeMax+1;i++)adj.add(new ArrayList<>());
+        contructAdjList(root,adj);
+        int[] dis = new int[treeMax+1];
+        for(int i=0;i<treeMax+1;i++)dis[i]=Integer.MAX_VALUE;
+        Queue<int[]> pq = new LinkedList<>();
+        pq.offer(new int[]{0,target.val});
+        dis[target.val] = 0;
+        while(!pq.isEmpty()){
+            int[] node = pq.poll();
+            int n = node[1];
+            int currDist = node[0];
+            for(int adjNode : adj.get(n)){
+                if(dis[adjNode] > currDist + 1 ){
+                    dis[adjNode] = currDist + 1 ;
+                    pq.offer(new int[]{dis[adjNode],adjNode});
+                }
+            }
+        }
+        for(int i=0;i<treeMax+1;i++){
+            if(dis[i]==k)result.add(i);
+        }
+        return result;
+    }
+}
