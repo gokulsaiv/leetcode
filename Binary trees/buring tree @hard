@@ -1,0 +1,74 @@
+/*
+class Node {
+    int data;
+    Node left;
+    Node right;
+
+    Node(int data) {
+        this.data = data;
+        left = null;
+        right = null;
+    }
+}  */
+class Solution {
+    int  maxNode=Integer.MIN_VALUE;
+    int nodeCount =0 ;
+    public void findMaxNodeAndTreeSize(Node root){
+        if(root==null) return;
+        else nodeCount++;
+        maxNode = Math.max(maxNode,root.data);
+        findMaxNodeAndTreeSize(root.left);
+        findMaxNodeAndTreeSize(root.right);
+
+    }
+    public void contructAdjList(Node root,List<List<Integer>> adj){
+        if(root==null)return;
+        if(root.left == null & root.right == null)return;
+        
+        if(root.left!=null){
+            adj.get(root.data).add(root.left.data);
+            adj.get(root.left.data).add(root.data);
+            
+        }
+        
+         if(root.right!=null){
+            adj.get(root.data).add(root.right.data);
+            adj.get(root.right.data).add(root.data);
+            
+        }
+        contructAdjList(root.left,adj);
+         contructAdjList(root.right,adj);
+    }
+    public  int minTime(Node root, int target) {
+        // code here
+        findMaxNodeAndTreeSize(root);
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i=0;i<maxNode+1;i++)adj.add(new ArrayList<>());
+        contructAdjList(root,adj);
+        int timeElapsed = 0;
+        boolean[] visited = new boolean[maxNode+1];
+        Queue<Integer> q = new LinkedList<>();
+        q.offer(target);
+        if(nodeCount==1)return 0;
+        nodeCount--;
+
+
+        while(!q.isEmpty()){
+            int len = q.size();
+            for( int i =0 ;i< len; i++){
+                int burntNode = q.poll();
+                visited[burntNode] = true;
+                for(int buringNode:adj.get(burntNode)){
+                    if(!visited[buringNode]){
+                        visited[buringNode] = true;
+                         nodeCount--;
+                         q.offer(buringNode);
+                    }
+            }
+            }
+            timeElapsed++;
+            if(nodeCount==0)break;
+        }
+        return timeElapsed;
+    }
+}
