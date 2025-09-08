@@ -1,0 +1,17 @@
+class Solution {
+    public int pivotIndex(int[] nums) {
+        Map<Integer,Integer> PrefixSum = new HashMap<>();
+        int totalSum =0 ;
+        for( int i =0 ;i < nums.length ; i++){
+            totalSum = totalSum + nums[i];
+            PrefixSum.put(i,totalSum);
+        }
+
+        for( int i =0 ;i < nums.length ; i++){
+            int leftSum = PrefixSum.get(i) - nums[i];
+            int rightSum = totalSum - PrefixSum.get(i);
+            if(leftSum == rightSum)return i;
+        }
+        return -1;
+    }
+}
