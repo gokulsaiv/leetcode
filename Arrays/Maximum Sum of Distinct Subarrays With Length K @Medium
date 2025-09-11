@@ -1,0 +1,38 @@
+class Solution {
+    public long maximumSubarraySum(int[] nums, int k) {
+        Map<Integer,Integer> unique = new HashMap<>();
+        int i=0,j=0;
+        long sum =0,max=0;
+
+        while(j < nums.length){
+            if((j-i) == k){
+                // //.out.println(i + "  "+ j);
+                //.out.println(sum + " hi");
+                max = Math.max(sum,max);
+                sum-=nums[i];
+                unique.remove(nums[i]);
+                i++;
+            }
+            if(!unique.containsKey(nums[j])){
+                sum+=nums[j];
+                unique.put(nums[j],j);
+                j++;
+
+            }
+            else{
+                sum-=nums[i];
+                unique.remove(nums[i]);
+                i++;
+            }
+             //.out.println(sum);
+        }
+
+         if((j-i) == k){
+                max = Math.max(sum,max);
+               
+            }
+
+        return max;
+        
+    }
+}
