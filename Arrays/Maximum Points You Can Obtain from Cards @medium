@@ -1,0 +1,19 @@
+class Solution {
+    public int maxScore(int[] cardPoints, int k) {
+        int[] fornt = new int[k+1];
+        int[] rear = new int[k+1];
+        int totalProfit =0;
+        for(int i=0;i<k;i++){
+            fornt[i+1] = fornt[i] + cardPoints[i];
+        }
+
+
+        for(int i=0;i<k;i++){
+            rear[i+1] = rear[i] + cardPoints[cardPoints.length -i - 1];
+        }
+        for( int i=0;i<=k;i++){
+            totalProfit = Math.max(totalProfit,fornt[i] + rear[k-i]);
+        }
+        return totalProfit;
+    }
+}
