@@ -1,0 +1,24 @@
+class Solution {
+    public long currentSumWithGivenDivisor(int[] nums,long d){
+        long sum =0;
+        for(int i : nums){
+            sum = sum + (long)Math.ceil((double)i/d);
+        }
+        return sum;
+    }
+    public int smallestDivisor(int[] nums, int threshold) {
+        long low = 1,high =0;
+        for( int i:nums)high =high+i;
+        int result = 0;
+        while(low<=high){
+            long div = low + (high-low)/2;
+            long curSum = currentSumWithGivenDivisor(nums,div);
+            if(curSum<=threshold){
+                    result =  (int)div;
+                    high = div -1;
+            }
+            else low = div +1;
+        }
+        return result;
+    }
+}
