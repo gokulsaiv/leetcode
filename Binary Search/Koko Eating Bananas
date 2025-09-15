@@ -1,0 +1,29 @@
+class Solution {
+    public long currentEatingTime(int[] piles, long speed) {
+        long eatingTime = 0;
+        for (int i : piles) {
+            eatingTime += (long) Math.ceil((double) i / speed);
+        }
+        return eatingTime;
+    }
+
+    public int minEatingSpeed(int[] piles, int h) {
+        Arrays.sort(piles);
+        long low = 1, high = piles[piles.length - 1];
+        int minSpeed = Integer.MAX_VALUE;
+
+        while (low <= high) {
+            long speed = low + (high - low) / 2;
+            long hoursTake = currentEatingTime(piles, speed);
+
+            if (hoursTake <= h) {
+                minSpeed = (int) Math.min(minSpeed, speed);
+                high = speed - 1;
+            } else {
+                low = speed + 1;
+            }
+        }
+
+        return minSpeed;
+    }
+}
