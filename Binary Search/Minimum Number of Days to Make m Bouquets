@@ -1,0 +1,37 @@
+class Solution {
+    public long ithDayFlowerCounter(int[] bloomDay,long day,int k){
+        long count =0 ;
+        long bouquets = 0;
+        for(int i:bloomDay){
+            if(day>=i)count++;
+            else count =0;
+            if(count == k){
+                bouquets++;
+                count=0;
+            }
+            
+        }
+        return count;
+    }
+    public int minDays(int[] bloomDay, int m, int k) {
+        long low =1,high=0;
+        long requiredFlowers = m*k;
+        int minDay =Integer.MAX_VALUE;
+        if(m*k>bloomDay.length)return -1;
+        for(int i : bloomDay){
+            high = Math.max(high,i);
+        }
+
+        while(low<=high){
+            long day = low + (high-low)/2;
+            long count = ithDayFlowerCounter(bloomDay,day);
+            if(count>=requiredFlowers){
+                minDay =  (int)Math.min(minDay,day);
+                high = day-1;
+            }
+            else low = day+1;
+
+        }
+        return minDay;
+    }
+}
