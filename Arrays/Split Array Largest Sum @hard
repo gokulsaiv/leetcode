@@ -1,0 +1,36 @@
+class Solution {
+    public long currentArraysWithGivenMax(int[] nums, long max){
+        long sum =0,arrays =0;
+        for(int i =0;i<nums.length;i++){
+            if(sum + nums[i]<=max)sum = sum + nums[i];
+            else{
+                if(nums[i]<=max){
+                    sum = nums[i];
+                    arrays++;
+                }
+                else sum = 0;
+            }
+        }
+        if(sum<=max)arrays++;
+        return arrays;
+    }
+    public int splitArray(int[] nums, int k) {
+        long low =Long.MIN_VALUE,high=0;
+        int ans=-1;
+        for( int i: nums){
+            high+=i;
+            low=Math.max(low,i);
+        }
+        if(k==1)return (int)high;
+        while(low<=high){
+            long curMax = low+(high-low)/2;
+            long curArrays = currentArraysWithGivenMax(nums,curMax);
+            if(curArrays<=k){
+                ans = (int)curMax;
+                high = curMax -1;
+            }
+            else low = curMax + 1;
+        }
+        return  ans;
+    }
+}
