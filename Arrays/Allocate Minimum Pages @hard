@@ -1,0 +1,41 @@
+class Solution {
+    public long numStudentGivenMax(int[] arr, long max){
+        long sutents=0,currSum=0;
+        for(int i =0;i<arr.length;i++){
+            if((currSum + arr[i])<=max)currSum = currSum + arr[i];
+            else {
+                if(arr[i]<=max){
+                    currSum = arr[i];
+                sutents++;
+                
+                    
+                }
+                else currSum=0;
+                
+            }
+        }
+        if(currSum<=max)sutents++;
+        return sutents;
+    } 
+    public int findPages(int[] arr, int k) {
+        // code here
+         long low = Long.MIN_VALUE,high =0;
+         int ans =-1;
+         if(arr.length<k)return -1;
+         for( int i : arr){
+            high =  high + i;
+            low = Math.max(low,i);
+         }
+        //  System.out.println(low+" "+high);
+         while(low<=high){
+             long mid = low + (high - low )/2;
+             long numStudents = numStudentGivenMax(arr,mid);
+             if(numStudents<=k){
+                 ans = (int)mid;
+                high = mid - 1 ;
+             }
+             else   low = mid +1;
+         }
+         return ans;
+    }
+}
