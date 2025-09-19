@@ -1,0 +1,68 @@
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    ListNode newHead = null;
+    public void ListReverser(ListNode root){
+        if(root.next == null){
+            newHead = root;
+            return;
+        }
+        ListReverser(root.next);
+        // System.out.println(root.val + " "+ root.next.val);
+        root.next.next = root;
+        root.next = null;
+    }
+    public ListNode reverseList(ListNode head) {
+       if(head == null)return head;
+       ListReverser(head);
+       return newHead;
+    }
+}
+O(n)
+
+
+
+
+
+
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        Stack<ListNode> stack = new Stack<>();
+        ListNode temp = head;
+        if(head == null)return head;
+        while(temp!=null){
+            stack.push(temp);
+            temp = temp.next;
+        }
+        ListNode ans = stack.peek();
+        while(stack.size()>1){
+            ListNode currNode = stack.pop();
+            currNode.next =  stack.peek();
+            stack.peek().next = null;
+
+        }
+        return ans;
+    }
+}
+
+
+O(2n)
