@@ -1,0 +1,50 @@
+/*
+class Node{
+    int data;
+    Node next;
+
+    Node(int x){
+        data = x;
+        next = null;
+    }
+}
+*/
+
+class Solution {
+    Node rhead = null;
+    public void reverse(Node root){
+        if(root.next==null){
+            rhead = root;
+            return;
+        }
+        reverse(root.next);
+        root.next.next  = root;
+        root.next = null;
+    }
+    
+    public Node addOne(Node head) {
+        // code here.
+        Node temp = head;
+        reverse(temp);
+        int carry =1;
+        Node crhead = rhead;
+        while(crhead!=null && carry>0){
+            if(crhead.data + carry > 9){
+               crhead.data = 0;
+               carry = 1;
+            }
+            else{
+                crhead.data =crhead.data + carry ;
+                carry = 0;
+            }
+            crhead = crhead.next;
+        }
+        reverse(rhead);
+        if(carry==1){
+            Node  nhead = new Node(1);
+            nhead.next = head;
+            return nhead;
+        }
+        return head;
+    }
+}
