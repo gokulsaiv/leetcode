@@ -1,0 +1,24 @@
+class Solution {
+    public int lengthOfLoop(Node head) {
+        // code here
+        Node fast = head;
+        Node slow = head;
+        Node found = null;
+        while(fast.next!=null && fast.next.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if(slow==fast){
+                found = slow;
+                break;
+            }
+        }
+        if(found== null)return 0;
+        int len =1;
+        Node start = found.next;
+        while(start!=found){
+            len++;
+            start = start.next;
+        }
+        return len;
+    }
+}
