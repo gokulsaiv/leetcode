@@ -1,0 +1,93 @@
+CLEANER WAY TO CONNECT
++=====================
+
+
+// Connect the lists
+czero.next = (one.next != null) ? one.next : two.next;
+cone.next = two.next;
+
+// Determine the final head
+if (zero.next != null) {
+    return zero.next;
+} else if (one.next != null) {
+    return one.next;
+} else {
+    return two.next;
+}
+
+
+
+
+
+
+my solution :
+
+class Solution {
+    public Node segregate(Node head) {
+        // code here
+        Node temp = head;
+        Node zero = new Node(-1);
+        Node one = new Node(-1);
+        Node two = new Node(-1);
+        
+        Node czero = zero;
+        Node cone = one;
+        Node ctwo = two;
+        
+        while(temp!=null){
+            if(temp.data == 0){
+                czero.next = temp;
+                czero = czero.next;
+            }
+            else if(temp.data == 1){
+                cone.next = temp;
+                cone = cone.next;
+            }
+            else{
+                ctwo.next = temp;
+                ctwo = ctwo.next;
+            }
+            temp = temp.next;
+        }
+        czero.next = null;
+        cone.next = null;
+        ctwo.next = null;
+        
+        Node sorted = new Node(-1);
+        Node cs = sorted;
+        
+        if(zero.next!=null){
+            cs.next = zero.next;
+            cs = czero;
+            if(one.next!=null){
+                cs.next = one.next;
+                cs = cone;
+                if(two.next!=null){
+                    cs.next = two.next;
+                }
+            }
+            else{
+                 if(two.next!=null){
+                    cs.next = two.next;
+                }
+            }
+        }
+        else{
+            
+            if(one.next!=null){
+                cs.next = one.next;
+                cs = cone;
+                if(two.next!=null){
+                    cs.next = two.next;
+                }
+            }
+            else{
+                 if(two.next!=null){
+                    cs.next = two.next;
+                }
+            }
+        }
+        
+        return sorted.next;
+    }
+}
