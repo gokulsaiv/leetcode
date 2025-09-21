@@ -1,0 +1,55 @@
+/*
+class Node {
+    int data;
+    Node next;
+    Node bottom;
+
+    Node(int x) {
+        data = x;
+        next = null;
+        bottom = null;
+    }
+}
+*/
+class Solution {
+    class Pqnode{
+        int val;
+        Node n;
+        Pqnode(int val,Node n){
+            this.val = val;
+            this.n = n;
+        }
+        
+    }
+    public Node flatten(Node root) {
+        // code here
+        PriorityQueue<Pqnode> pq = new PriorityQueue<>((a,b)->{
+            return Integer.compare(a.val,b.val);
+        });
+        
+        Node temp = root;
+        while(temp!=null){
+            pq.offer(new Pqnode(temp.data,temp));
+            temp = temp.next;
+            
+        }
+        Node dummy = new Node(0);
+        Node cdummy = dummy;
+        while(!pq.isEmpty()){
+            Pqnode cur  = pq.poll();
+            
+            if(cur.n.bottom!=null){
+               // System.out.println(cur.n.bottom.data + "" + "new");
+                Pqnode newnode = new Pqnode(cur.n.bottom.data , cur.n.bottom);
+                
+                pq.offer(newnode);
+                cur.n.bottom = null;
+            }
+            cdummy.bottom = cur.n;
+            
+            cdummy = cdummy.bottom;
+            // System.out.println(dummy.data);
+        }
+        return dummy.bottom;
+    }
+}
