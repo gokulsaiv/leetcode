@@ -1,0 +1,22 @@
+Example 1:
+
+Input: arr = [2,2,2,2,5,5,5,8], k = 3, threshold = 4
+Output: 3
+Explanation: Sub-arrays [2,5,5],[5,5,5] and [5,5,8] have averages 4, 5 and 6 respectively. All other sub-arrays of size 3 have averages less than 4 (the threshold).
+
+class Solution {
+    public int numOfSubarrays(int[] nums, int k, int threshold) {
+       
+        long sum =0;
+        int numSubArrays=0;
+        for(int i=0;i<k;i++){
+            sum+=nums[i];
+        }
+        if((int)sum/k >=threshold)numSubArrays++;
+        for(int i=k;i<nums.length;i++){
+           sum = sum + nums[i] - nums[i-k];
+           if((int)sum/k >=threshold)numSubArrays++;
+        }
+        return numSubArrays;
+    }
+}
