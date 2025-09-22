@@ -1,0 +1,24 @@
+class Solution {
+    public int minSwaps(int[] arr) {
+        // Complete the function
+        int ones = 0,sum=0,max = Integer.MIN_VALUE;
+        for( int i =0 ;i< arr.length ; i++){
+            if(arr[i]==1)ones++;
+        }
+        if(ones==0)return -1;
+         for( int i =0 ;i<ones ; i++){
+           sum+=arr[i];
+        }
+        max = Math.max(max,sum);
+         for( int i =ones ;i< arr.length ; i++){
+            sum = sum + arr[i] - arr[i-ones];
+             max = Math.max(max,sum);
+        }
+        return ones - max;
+    }
+}
+
+
+Input: arr[] = [1, 0, 1, 0, 1]
+Output: 1
+Explanation: Only 1 swap is required to group all 1's together. Swapping index 1 and 4 will give arr[] = [1, 1, 1, 0, 0]
