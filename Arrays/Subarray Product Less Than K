@@ -1,0 +1,36 @@
+class Solution {
+    public int numSubarrayProductLessThanK(int[] nums, int k) {
+        if(k<=1)return 0;
+        int i =0 ,j=0,product=1,sa =0;
+        while( j<nums.length){
+            while(j<nums.length){
+                product = product * nums[j];
+                while(i<nums.length && product>=k){
+                product = product/nums[i];
+                i++;
+               
+            }
+                sa = sa + (j-i+1);
+
+                 j++;
+            }
+        }
+        return sa;
+    }
+}
+
+
+
+Input
+nums =
+[76,8,75,22]
+k =
+18
+
+
+nums =
+[10,5,2,6]
+k =
+100
+Output
+8
