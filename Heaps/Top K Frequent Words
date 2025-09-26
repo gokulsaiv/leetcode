@@ -1,0 +1,32 @@
+not optimal but is know how to optimize
+
+new topics str.compareTo(str2) will comare and return > 1 is its str1 is lexigogicall bigeer that str2 , 0 if equal , 0< id smaller
+
+class Solution {
+    public List<String> topKFrequent(String[] words, int k) {
+        Map<String,Integer> map = new HashMap<>();
+        List<String> ans = new ArrayList<>();
+        PriorityQueue<Map.Entry<String,Integer>> pq = new PriorityQueue<>((a,b)->{
+            if(a.getValue()==b.getValue()) return a.getKey().compareTo(b.getKey());
+            return Integer.compare(b.getValue(),a.getValue());
+        });
+        for(String str : words){
+            if(!map.containsKey(str)){
+                map.put(str,1);
+            }
+            else{
+                map.put(str,map.get(str)+1);
+            }
+        }
+        for(Map.Entry<String,Integer> e : map.entrySet()){
+            pq.offer(e);
+            
+        }
+        while(!pq.isEmpty() && k > 0 ){
+            // System.out.println(pq.peek().getKey() + " "+ pq.peek().getValue());
+            ans.add(pq.poll().getKey());
+            k--;
+        }
+        return ans;
+    }
+}
