@@ -1,0 +1,28 @@
+class Node{
+    int index;
+    int[] nums;
+        Node(int i,int[] a){
+            index = i;
+            nums = a;
+        }
+}
+class Solution {
+    public int kthSmallest(int[][] matrix, int k) {
+        PriorityQueue<Node> pq = new PriorityQueue<>((a,b)->{
+            return Integer.compare(a.nums[a.index] , b.nums[b.index]);
+        });
+        
+        for(int[] row : matrix){
+            pq.offer(new Node(0,row));
+        }
+
+        while(k>1){
+            Node current = pq.poll();
+            if(current.index + 1 < matrix.length){
+                pq.offer(new Node(current.index + 1 ,current.nums));
+            }
+            k--;
+        }
+        return pq.peek().nums[pq.peek().index];
+    }
+}
