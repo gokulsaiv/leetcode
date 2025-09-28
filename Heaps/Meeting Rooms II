@@ -1,0 +1,47 @@
+class Meeting{
+    int start;
+    int end;
+    Meeting(int start,int end){
+        this.start = start;
+        this.end = end;
+    }
+}
+class Room{
+    int index;
+    int freeTime;
+    Room(int i,int free){
+        this.index = i;
+        this.freeTime = free;
+    }
+}
+class Solution {
+    public int minMeetingRooms(int[] start, int[] end) {
+        // code here
+        PriorityQueue<Meeting> pq = new PriorityQueue<>((a,b)->{
+            if(a.start == b.start)return Integer.compare(a.end,b.end);
+            return Integer.compare(a.start,b.start);
+        });
+         PriorityQueue<Room> rooms = new PriorityQueue<>((a,b)->{
+             return Integer.compare(a.freeTime,b.freeTime);
+         });
+         rooms.offer(new Room(0,-1));
+         for(int i =0 ;i< start.length ;i++){
+            //   System.out.println(start[i]+ " "+end[i]);
+             pq.offer(new Meeting(start[i],end[i]));
+         }
+         
+         while(!pq.isEmpty()){
+             Meeting meet = pq.poll();
+            //  System.out.println(meet.start+ " "+meet.end);
+             if(meet.start >= rooms.peek().freeTime){
+                 Room n = rooms.poll();
+                 rooms.offer(new Room(n.index,meet.end));
+             }
+             else{
+                //  System.out.println(meet.end);
+                 rooms.offer(new Room(rooms.peek().index+1,meet.end));
+             }
+         }
+        return rooms.size();
+    }
+}
