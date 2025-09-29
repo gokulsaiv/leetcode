@@ -1,0 +1,35 @@
+class Solution {
+    public boolean helper(int[] base,int[] cur){
+        for(int i =0;i< cur.length;i++){
+            if(base[i]!=cur[i])return false;
+        }
+        return true;
+    }
+    public List<Integer> findAnagrams(String s, String p) {
+       if(p.length() > s.length())return new ArrayList<>(); 
+
+       int[] base = new int[27];
+       int[] cur = new int[27];
+
+       List<Integer> ans = new ArrayList<>();
+
+       for(int i =0;i< p.length();i++){
+        base[p.charAt(i) - 97]++;
+       }
+
+       for(int i =0;i< p.length();i++){
+        cur[s.charAt(i) - 97]++;
+       }
+
+       if(helper(base,cur))ans.add(0);
+
+       for(int i =p.length();i< s.length();i++){
+            cur[s.charAt(i) - 97]++;
+            cur[s.charAt(i-p.length()) - 97 ]--;
+            if(helper(base,cur))ans.add(i-p.length()+1);
+       }
+
+       return ans;
+       
+    }
+}
