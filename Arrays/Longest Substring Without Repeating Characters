@@ -1,0 +1,63 @@
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        Set<Character> set = new HashSet<>();
+        if(s.length()<=1)return s.length();
+        int i =0,j=0,max=0;
+        while( j<s.length()){
+            while(j< s.length() && !set.contains(s.charAt(j))){
+                max = Math.max(max,j-i+1);
+                set.add(s.charAt(j));
+                j++;
+               
+            }
+            
+            while(i<s.length() && j<s.length() && set.contains(s.charAt(j))){
+                set.remove(s.charAt(i));
+                i++;
+            }
+        }
+        return max;
+    }
+}
+
+my implemtation bit complex but get the job done
+
+optiaml approch 
+
+with 2 while loops
+
+public int lengthOfLongestSubstring(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+
+        Set<Character> charSet = new HashSet<>();
+        int i = 0; // Left pointer (start of the window)
+        int j = 0; // Right pointer (end of the window)
+        int maxLength = 0;
+
+        // The entire process is controlled by the right pointer 'j'
+        while (j < s.length()) {
+            char currentChar = s.charAt(j);
+
+            // 1. Shrink/Contract the window if the current character is a duplicate
+            while (charSet.contains(currentChar)) {
+                // Remove the character at the left pointer 'i'
+                charSet.remove(s.charAt(i));
+                // Advance the left pointer 'i'
+                i++;
+            }
+
+            // 2. Expand/Grow the window (Current character is now unique)
+            charSet.add(currentChar);
+
+            // 3. Update the maximum length (always done after expansion)
+            // Current length is j - i + 1
+            maxLength = Math.max(maxLength, j - i + 1);
+
+            // 4. Advance the right pointer 'j' to move the window
+            j++;
+        }
+
+        return maxLength;
+    }
