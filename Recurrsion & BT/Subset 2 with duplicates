@@ -1,0 +1,22 @@
+//Your explanation boils down to this: The "Include" branch of the first duplicate covers all required combinations, and the "Exclude" branch must therefore skip all duplicates to prevent redundancy.
+class Solution {
+    public void subsetGenator(int i , int[] nums,List<List<Integer>> ans , List<Integer> temp){
+        if(i==nums.length){
+            ans.add(new ArrayList<>(temp));
+            return;
+        }
+        //include
+        temp.add(nums[i]);
+        subsetGenator(i+1,nums,ans,temp);
+        temp.remove(temp.size()-1);
+        //eclude
+        subsetGenator(i+1,nums,ans,temp);
+    }
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> temp = new ArrayList<>();
+        subsetGenator(0,nums,ans,temp);
+        return ans;
+
+    }
+}
