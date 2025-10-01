@@ -1,0 +1,80 @@
+class Solution {
+    // Helper to convert the char[][] board to List<String> for the result
+    private List<String> convertBoardToList(char[][] board) {
+        List<String> result = new ArrayList<>();
+        for (char[] row : board) {
+            // Converts the char array row to a String
+            result.add(new String(row));
+        }
+        return result;
+    }
+    
+    // Checks if placing a Queen at (row, col) is safe by looking at previous rows
+    public boolean isSafe(char[][] board, int row, int col, int n){
+        
+        // 1. Check Column (Vertically up)
+        for(int i = 0; i < row; i++){
+            if(board[i][col] == 'Q') return false; 
+        }
+
+        // 2. Check Top-Left Diagonal
+        int r = row - 1;
+        int c = col - 1;
+        while(r >= 0 && c >= 0){
+            if(board[r][c] == 'Q') return false;
+            r--;
+            c--;
+        }
+
+        // 3. Check Top-Right Diagonal
+        r = row - 1;
+        c = col + 1;
+        while(r >= 0 && c < n){ // n is the board size
+            if(board[r][c] == 'Q') return false;
+            r--;
+            c++;
+        }
+        
+        // **NOTE:** We don't check the current row because the solver places only one Q per row.
+        // We don't check below the current row because those spots are empty.
+        
+        return true;
+    }
+    
+    public void solver(int row, int n, char[][] board, List<List<String>> ans){
+        // Base Case: All Queens placed successfully
+        if(row == n){
+            ans.add(convertBoardToList(board)); // Convert to List<String> ONLY at the end
+            return;
+        }
+
+        // Try every column in the current row
+        for(int col = 0; col < n; col++){
+            
+            if(isSafe(board, row, col, n)){
+                
+                // 1. Place the Queen (O(1) operation)
+                board[row][col] = 'Q';
+                
+                // 2. Recurse
+                solver(row + 1, n, board, ans);
+                
+                // 3. Backtrack (Undo the placement, O(1) operation)
+                board[row][col] = '.';
+            }
+        }
+    }
+    
+    public List<List<String>> solveNQueens(int n) {
+        List<List<String>> ans = new ArrayList<>();
+        
+        // Initialize the N x N board with '.'
+        char[][] board = new char[n][n];
+        for(int i = 0; i < n; i++) {
+            Arrays.fill(board[i], '.');
+        }
+        
+        solver(0, n, board, ans);
+        return ans;
+    }
+}
