@@ -1,0 +1,50 @@
+class Solution {
+    public void explorer(int i , int j,boolean[][] vis,ArrayList<String> temp ,ArrayList<String> ans,int[][] maze){
+        if((i == maze.length-1) && (j == maze[0].length-1)){
+            String s = "";
+            for(String x:temp){
+                s=s+x;
+            }
+            ans.add(s);
+            return;
+        }
+        vis[i][j] = true;
+        if(i!=maze.length-1 && !vis[i+1][j] && maze[i+1][j] == 1){
+            temp.add("D");
+            explorer(i+1,j,vis,temp,ans,maze);
+            temp.remove(temp.size()-1);
+        }
+         if(j!=0 && !vis[i][j-1] && maze[i][j-1] == 1){
+            temp.add("L");
+            explorer(i,j-1,vis,temp,ans,maze);
+            temp.remove(temp.size()-1);
+        }
+        
+        
+        if(j!=maze.length-1 && !vis[i][j+1] && maze[i][j+1] == 1){
+            temp.add("R");
+            explorer(i,j+1,vis,temp,ans,maze);
+            temp.remove(temp.size()-1);
+        }
+        
+        if(i!=0 && !vis[i-1][j] && maze[i-1][j] == 1){
+            temp.add("U");
+            explorer(i-1,j,vis,temp,ans,maze);
+            temp.remove(temp.size()-1);
+        }
+        
+       
+       
+        vis[i][j] = false;
+    }
+    public ArrayList<String> ratInMaze(int[][] maze) {
+        // code here
+        int n = maze.length;
+        boolean[][] vis = new boolean[n][n];
+        ArrayList<String> ans = new ArrayList<>();
+        if(maze[n-1][n-1]==0)return ans;
+         ArrayList<String> temp = new ArrayList<>();
+        explorer(0,0,vis,temp,ans,maze);
+        return ans;
+    }
+}
