@@ -1,0 +1,17 @@
+class Solution {
+   
+    public double myPowHepler(double x,int n){
+        if(n == 1)return x;
+        if(n== -1)return 1/x;
+        if(n==0)return 1;
+        double subProblem = myPowHepler(x,(int)n/2);
+        if(n%2==0){
+            return  subProblem * subProblem;
+        }
+        if(n<0)return 1/x * subProblem * subProblem;
+        return  x * subProblem * subProblem;
+    }
+    public double myPow(double x, int n) {
+        return myPowHepler(x,n);
+    }
+}
