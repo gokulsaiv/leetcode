@@ -1,0 +1,60 @@
+class Solution {
+    int count = 0;
+    public void merge(int[] nums, int l , int mid , int h){
+        int i = l , j= mid+1;
+        while(i<=mid && j <=h){
+            long curr =  nums[j];
+            if((long)nums[i] > 2 * curr){
+                j++;
+                count = count + (mid - i +1);
+
+            }
+            else{
+                i++;
+            }
+        }
+            List<Integer> temp = new ArrayList<>();
+        i = l;
+        j = mid+1;
+        while(i <= mid && j<= h){
+            if(nums[i] < nums[j]){
+                temp.add(nums[i]);
+                i++;
+            }
+            else{
+                temp.add(nums[j]);
+                j++;
+            }
+        }
+        
+        while(i<=mid){
+            temp.add(nums[i]);
+            i++;
+        }
+        
+        while(j<=h){
+            temp.add(nums[j]);
+            j++;
+        }
+        i =0;
+        for(int k = l ; k <= h ; k++){
+            nums[k]=temp.get(i++);
+        }
+
+        
+    }
+
+    public void divider(int[] nums, int l , int h){
+        if(l == h)return;
+        
+        int mid = l + (h-l)/2;
+        divider(nums,l,mid);
+        divider(nums,mid+1,h);
+        merge(nums,l,mid,h);
+
+    }
+    public int reversePairs(int[] nums) {
+        divider(nums,0,nums.length-1);
+        return count;
+    }
+}
