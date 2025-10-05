@@ -1,0 +1,65 @@
+class Node{
+    int val;
+    int curmin;
+    Node next;
+    Node prev;
+    Node(int val,int curmin,Node next,Node prev){
+        this.val = val;
+        this.curmin = curmin;
+        this.next = next ;
+        this.prev = prev;
+    }
+}
+class MinStack {
+    Node head;
+    Node tail;
+    int min;
+    public MinStack() {
+       min = Integer.MAX_VALUE;
+       head = new Node(min,min,null,null); 
+       tail = new Node(min,min,null,null); 
+       head.next = tail;
+       tail.prev=head;
+    }
+    
+    public void push(int val) {
+        if(val<min){
+            min = val;
+        }
+        Node n = new Node(val,min,null,null);
+        n.next = head.next;
+        n.prev = head;
+        head.next.prev = n;
+        head.next = n;
+        
+    }
+    
+    public void pop() {
+        if(head.next.val==min){
+            min = head.next.next.curmin;
+        }
+        head.next = head.next.next;
+        head.next.prev = head;
+        
+        if(head.next==tail){
+            min = Integer.MAX_VALUE;
+        }
+    }
+    
+    public int top() {
+        return head.next.val;
+    }
+    
+    public int getMin() {
+        return head.next.curmin;
+    }
+}
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack obj = new MinStack();
+ * obj.push(val);
+ * obj.pop();
+ * int param_3 = obj.top();
+ * int param_4 = obj.getMin();
+ */
