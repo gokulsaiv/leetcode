@@ -1,0 +1,16 @@
+class HitCounter:
+
+    def __init__(self):
+        # Store timestamps of hits
+        self.hits = deque()
+
+    def hit(self, timestamp: int) -> None:
+        """Record a hit at given timestamp."""
+        self.hits.append(timestamp)
+
+    def getHits(self, timestamp: int) -> int:
+        """Return number of hits in the past 5 minutes (300 seconds)."""
+        # Remove outdated hits
+        while self.hits and self.hits[0] <= timestamp - 300:
+            self.hits.popleft()
+        return len(self.hits)
