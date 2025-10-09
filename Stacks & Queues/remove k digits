@@ -1,0 +1,44 @@
+class Solution {
+    public String removeKdigits(String num, int k) {
+        // Base case: remove all digits
+        if (k == num.length()) return "0";
+
+        Stack<Character> stack = new Stack<>();
+        
+        for (char digit : num.toCharArray()) {
+            // 1. Greedy Monotonic Removal:
+            // Remove stack top if it's larger than the current digit AND k is not exhausted.
+            while (!stack.isEmpty() && k > 0 && digit < stack.peek()) {
+                stack.pop();
+                k--; // CRUCIAL: Decrement k
+            }
+            
+            // 2. Add the current digit:
+            // Skip leading zeros ONLY if the stack is empty (to avoid ["0", "2", "1"]).
+            if (stack.isEmpty() && digit == '0') {
+                continue;
+            }
+            stack.push(digit);
+        }
+
+        // 3. Post-Processing (Monotonically Increasing Case):
+        // If k > 0, we still need to remove digits (e.g., num="123", k=1).
+        // Since the stack is now non-decreasing, remove from the end.
+        while (k > 0 && !stack.isEmpty()) {
+            stack.pop();
+            k--;
+        }
+
+        // 4. Build Final String:
+        StringBuilder sb = new StringBuilder();
+        // Append elements to StringBuilder
+        for (char d : stack) {
+            sb.append(d);
+        }
+
+        // Handle the final result
+        String result = sb.toString();
+        // If the resulting string is empty, return "0".
+        return result.isEmpty() ? "0" : result;
+    }
+}
