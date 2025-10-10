@@ -1,0 +1,14 @@
+class Solution {
+    public int findMin(int n) {
+        // code here
+        int coins =0 ;
+        coins = coins + (int)n/10;
+        n = (int)n%10;
+        coins = coins + (int)n/5;
+        n = (int)n%5;
+        coins = coins + (int)n/2;
+        n = (int)n%2;
+        coins = coins + n ;
+        return coins;
+    }
+}
