@@ -1,0 +1,13 @@
+
+class Solution {
+    static int solve(int bt[]) {
+        // code here
+        Arrays.sort(bt);
+        long totalWaitingTime=0 , previousElementsWaitig =0 ;
+        for(int i =1  ; i < bt.length ; i++){
+            totalWaitingTime = totalWaitingTime +(  previousElementsWaitig + bt[i-1]);
+            previousElementsWaitig = previousElementsWaitig + bt[i-1] ; 
+        }
+        return (int)Math.floor(totalWaitingTime/bt.length);
+    }
+}
