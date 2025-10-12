@@ -1,0 +1,16 @@
+class Solution {
+    
+    public int maxProfit(int[] prices) {
+        int lastBoughtPrice =Integer.MAX_VALUE,totalProfit =0;
+        for(int i=0;i<prices.length ; i++){
+            if(prices[i]<lastBoughtPrice){
+                lastBoughtPrice = prices[i];
+            }
+            if(prices[i] - lastBoughtPrice > 0){
+                totalProfit = totalProfit + (prices[i] - lastBoughtPrice);
+                lastBoughtPrice = prices[i];
+            }
+        }
+        return totalProfit;
+    }
+}
