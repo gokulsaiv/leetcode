@@ -1,0 +1,24 @@
+
+class Solution {
+    public static int minCost(int[] arr) {
+        // code here
+        int totalProfit =0;
+        PriorityQueue<Rope> pq = new PriorityQueue<>((a,b)->Integer.compare(a.size,b.size));
+        for(int ele :  arr){
+            pq.offer(new Rope(ele));
+        }
+        while(pq.size()>=2){
+            Rope r1 = pq.poll();
+            Rope r2 = pq.poll();
+            totalProfit = totalProfit + r1.size + r2.size;
+            pq.offer(new Rope(r1.size + r2.size));
+        }
+        return totalProfit;
+    }
+}
+class Rope{
+    int size;
+    Rope(int size){
+        this.size =  size;
+    }
+}
