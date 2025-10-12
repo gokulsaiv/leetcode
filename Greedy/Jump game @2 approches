@@ -1,0 +1,46 @@
+//optimal basedon max reach from the current index
+class Solution {
+
+    
+    public boolean canJump(int[] nums) {
+        if(nums.length == 1)return true;
+      if(nums[0] == 0)return false;
+
+        int reach = 0;
+        for(int i =0 ; i< nums.length ; i++){
+            if(i > reach) return false;
+            reach = Math.max(reach , i + nums[i]);
+
+            if(i+nums[i] >= nums.length-1)return true;
+        }
+       return false;
+    }
+}
+
+
+// o(n2) based on dp so;ve not not  o(n)
+
+class Solution {
+    Boolean[] dp;
+    public boolean canJumpSolver(int i , int[] nums){
+        // System.out.println(i);
+        if(i>=nums.length-1)return true;
+        if(nums[i] ==  0 )return false;
+
+        if(i<=nums.length-1 && dp[i]!=null)return dp[i];
+
+        for( int jump = nums[i]; jump > 0 ; jump--){
+            
+            dp[i] = canJumpSolver(i + jump , nums);
+            if(dp[i])return true;
+        }
+        return dp[i] = false;
+    }
+    public boolean canJump(int[] nums) {
+        dp = new Boolean[nums.length+1];
+        
+        if(nums.length==1)return true;
+        if(nums[0] ==  0)return false;
+        return canJumpSolver(0,nums);
+    }
+}
