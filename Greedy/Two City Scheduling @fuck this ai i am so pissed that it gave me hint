@@ -1,0 +1,34 @@
+class Solution {
+    public int twoCitySchedCost(int[][] costs) {
+        int n =  costs.length/2;
+        PriorityQueue<AiRuniedMyMood> pq = new PriorityQueue<>((a,b)->{
+            return Integer.compare(a.diff,b.diff);
+        });
+        for(int i =0 ; i< costs.length ; i++){
+            pq.offer(new AiRuniedMyMood(costs[i][0] - costs[i][1] ,costs[i][0] , costs[i][1]));
+        }
+
+        int coun =0,cost =0;
+        while(!pq.isEmpty()){
+           
+            if(coun <  n){
+                cost = cost +  pq.poll().cA;
+            }
+            else{
+                cost = cost +  pq.poll().cB;
+            }
+            coun++;
+        }
+        return cost;
+    }
+}
+class AiRuniedMyMood{
+    int diff;
+    int cA;
+    int cB;
+    AiRuniedMyMood(int diff , int cA , int cB){
+        this.diff = diff;
+        this.cA = cA;
+        this.cB = cB;
+    }
+}
