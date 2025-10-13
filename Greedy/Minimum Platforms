@@ -1,0 +1,48 @@
+class Solution {
+    public int minPlatform(int arr[], int dep[]) {
+        //  code here
+        PriorityQueue<TrainSchedule> pq = new PriorityQueue<>((a,b)->{
+            if(a.start == b.start)return Integer.compare(a.end , b.end);
+            return Integer.compare(a.start , b.start);
+        });
+        
+        PriorityQueue<Platforms> freePlatForms = new PriorityQueue<>((a,b)->{
+            
+            return Integer.compare(a.freeTime , b.freeTime);
+        });
+        
+        for(int i =0 ; i< arr.length ; i++){
+            pq.offer(new TrainSchedule(arr[i], dep[i]));
+        }
+        
+        freePlatForms.offer(new Platforms(-1));
+        
+        while(!pq.isEmpty()){
+            TrainSchedule currentTrain = pq.poll();
+            if(freePlatForms.peek().freeTime < currentTrain.start){
+              Platforms  oldDep  = freePlatForms.poll();
+              freePlatForms.offer(new Platforms(currentTrain.end));
+            }
+            else{
+                freePlatForms.offer(new Platforms(currentTrain.end));
+            }
+        }
+        return freePlatForms.size();
+        
+        
+    }
+}
+class TrainSchedule{
+    int start;
+    int end;
+    TrainSchedule(int start , int end){
+        this.start  = start ;
+        this.end = end;
+    }
+}
+class Platforms{
+    int freeTime;
+    Platforms(int freeTime){
+        this.freeTime = freeTime;
+    }
+}
