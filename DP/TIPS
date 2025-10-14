@@ -1,2 +1,3 @@
 Time Complexity 
 Dp =O(Total Number of States×Time to Compute One State)
+- This is basically the size of the memo table as this is the max number state it can have and can tco oyt side and each state is calculatd once
