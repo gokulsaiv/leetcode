@@ -1,0 +1,59 @@
+#memoization
+
+class Solution {
+    int[] dp;
+    public int climber(int n){
+        if(n==0)return 1;
+        if(dp[n]!=-1)return dp[n];
+        int one = climber(n-1);
+
+        int two =0;
+        if(n>=2)two = climber(n-2);
+
+        return dp[n] =  one + two ;
+
+    }
+    public int climbStairs(int n) {
+        dp = new int[n+1];
+        Arrays.fill(dp,-1);
+       return  climber(n);
+    }
+}
+
+#TAB
+
+class Solution {
+  
+    public int climbStairs(int n) {
+        dp = new int[n+1];
+        dp[0] = 1;
+        for(int i =1 ; i < n+1;  i++ ){
+        int one = dp[i-1];
+
+        int two =0;
+        if(i>=2)two = dp[i-2];
+
+        dp[i] =  one + two ; 
+        } 
+       return dp[n];
+    }
+}
+
+Space OP
+
+class Solution {
+    
+    public int climbStairs(int n) {
+        int last = 1 ,  seconlast = 0;
+        for(int i =1 ; i < n+1;  i++ ){
+        int one = last;
+
+        int two =0;
+        if(i>=2)two = seconlast;
+
+        seconlast = last;
+        last =  one + two ; 
+        } 
+       return last;
+    }
+}
