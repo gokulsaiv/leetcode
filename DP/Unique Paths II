@@ -1,0 +1,73 @@
+Memo
+class Solution {    
+    int[][] dp;
+    public int dfs(int i , int j , int[][] grid){
+        if(i == 0 && j == 0)return 1;
+        if(dp[i][j]!=-1)return dp[i][j];
+        int down = (i!=0 && grid[i-1][j]!=1) ? dfs(i-1,j,grid) : 0;
+
+         int righ = (j!=0 && grid[i][j-1]!=1) ? dfs(i,j-1,grid) : 0;
+
+         return dp[i][j] = down + righ ; 
+
+    }
+    public int uniquePathsWithObstacles(int[][] grid) {
+        if(grid[grid.length-1][grid[0].length-1]==1 || grid[0][0]==1)return 0;
+        dp = new int[grid.length][grid[0].length];
+        for(int i =0 ; i< grid.length ; i++)Arrays.fill(dp[i],-1);
+        return dfs(grid.length-1,grid[0].length-1,grid);
+    }
+}
+
+Tab
+
+class Solution {
+    public int uniquePathsWithObstacles(int[][] grid) {
+        int R = grid.length;
+        int C = grid[0].length;
+
+        // Early exit if start or end is blocked
+        if (grid[0][0] == 1 || grid[R - 1][C - 1] == 1) return 0;
+
+        // Use the grid itself for DP to save space (or a separate DP array)
+        int[][] dp = new int[R][C];
+
+        // 1. Initialize First Column
+        for (int i = 0; i < R; i++) {
+            if (grid[i][0] == 1) {
+                // If an obstacle is hit, all cells below it are unreachable
+                break;
+            }
+            dp[i][0] = 1;
+        }
+
+        // 2. Initialize First Row
+        for (int j = 0; j < C; j++) {
+            if (grid[0][j] == 1) {
+                // If an obstacle is hit, all cells to the right are unreachable
+                break;
+            }
+            dp[0][j] = 1;
+        }
+        
+        // **Correction for dp[0][0]:** Since both loops initialize it, this is fine
+        // as long as grid[0][0] is 0. If it's 1, it's caught by the initial check.
+
+        // 3. Fill the rest of the DP table
+        for (int i = 1; i < R; i++) {
+            for (int j = 1; j < C; j++) {
+                if (grid[i][j] == 1) {
+                    // Current cell is an obstacle, 0 paths go through it
+                    dp[i][j] = 0;
+                } else {
+                    // Paths = paths from top (dp[i-1][j]) + paths from left (dp[i][j-1])
+                    // No need to check grid[i-1][j] or grid[i][j-1] here, 
+                    // as their DP values are already 0 if they were obstacles.
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+        }
+
+        return dp[R - 1][C - 1];
+    }
+}
