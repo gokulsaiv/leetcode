@@ -1,0 +1,59 @@
+Memo
+
+// User function Template for Java
+
+class Solution {
+    int[][] dp;
+    public int dfs( int i , int W , int[] val , int[] wt){
+        if(W==0)return 0;
+        if(i==0){
+            return (W/wt[0])*val[0];
+        }
+        if(dp[i][W]!=-1)return dp[i][W];
+        int include = 0 ;
+        if(W>=wt[i])include = val[i] + dfs(i,W-wt[i],val,wt);
+        
+        int exclude  = dfs(i-1,W,val,wt);
+        
+        return dp[i][W] = Math.max(include , exclude);
+    }
+   
+    public  int knapSack(int val[], int wt[], int capacity) {
+        dp = new int[val.length][capacity+1];
+        for(int i =0 ;i < val.length;i++)Arrays.fill(dp[i],-1);
+        return dfs(val.length-1,capacity,val,wt);
+    }
+}
+
+Tab
+ public  int knapSack(int val[], int wt[], int capacity) {
+        dp = new int[val.length][capacity+1];
+        for(int i =0 ;i < val.length;i++){
+            dp[i][0] = 0;
+        }
+        
+        int w0 = wt[0];
+        int v0 = val[0];
+        
+        for (int W = 1; W <= capacity; W++) {
+            if (W >= w0) {
+                // The value is the value of item 0, plus the max value achievable 
+                // for the remaining capacity (W - w0), using ONLY item 0.
+                // Since this is the first row, we rely on the previous capacity check (W - w0).
+                dp[0][W] = v0 + dp[0][W - w0];
+            }
+            // If W < w0, dp[0][W] remains 0 (default initialization).
+        }
+        
+        for( int i = 1  ; i< val.length ; i++){
+            for( int W = 1 ; W <= capacity ; W++){
+                int include = 0 ;
+                if(W>=wt[i])include = val[i] + dp[i][W-wt[i]];
+                
+                int exclude  = dp[i-1][W];
+                
+                dp[i][W] = Math.max(include , exclude);
+            }
+        }
+        return dp[val.length-1][capacity];
+    }
