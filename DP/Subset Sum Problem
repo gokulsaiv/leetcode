@@ -1,0 +1,67 @@
+Memo
+
+class Solution {
+    Boolean[][] dp;
+    public Boolean dfs( int i  , int target , int[] arr ){
+        if(target <  0)return false;
+        if(target ==  0)return true ;
+        if(i == 0 && target > 0 ){
+            if(target == arr[0])return true;
+            return false;
+        }
+        
+        if(dp[i][target]!= null)return dp[i][target];
+        
+        boolean include = false;
+        if(target -  arr[i] >= 0){
+            include = dfs(i-1 ,  target - arr[i] , arr);
+        }
+        
+        boolean exclude = dfs( i -1 , target , arr);
+        
+        return dp[i][target] = include || exclude ; 
+    }
+    public Boolean isSubsetSum(int arr[], int sum) {
+        // code here
+        dp = new Boolean[arr.length][sum+1];
+        
+        
+        return  dfs(arr.length-1,sum , arr);
+       
+    }
+}
+
+TAB
+
+class Solution {
+    boolean[][] dp;
+    
+    public Boolean isSubsetSum(int arr[], int sum) {
+        // code here
+        dp = new boolean[arr.length][sum+1];
+        for( int i = 0 ; i<dp.length ; i++){
+            dp[i][0] = true;
+        }
+        
+        //  for( int i = 0 ; i<dp[0].length ; i++){
+        //     dp[0][i] = false;
+        // }
+        if(arr[0]<=sum)dp[0][arr[0]] = true;
+        
+        for( int i =1 ; i<dp.length ;i++){
+            for(int target = 1 ; target <= sum ; target++){
+                
+        
+                boolean include = false;
+                if(target -  arr[i] >= 0){
+                    include = dp[i-1][  target - arr[i]];
+                }
+                
+                boolean exclude = dp[i -1 ][ target ];
+                
+                dp[i][target] = include || exclude ; 
+            }
+        }
+        return dp[arr.length-1][sum];
+    }
+}
