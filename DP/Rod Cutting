@@ -1,0 +1,25 @@
+class Solution {
+   int[][] dp;
+    public int dfs(int i, int len , int[] price){
+        if(len == 0)return 0;
+        if(i-1==0){
+            return (len/i)*price[i-1];
+        }
+        if (dp[i][len] != -1) {
+            return dp[i][len];
+        }
+        int include  = 0; 
+        if(len>=i)include = price[i-1] + dfs(i,len-i,price);
+        
+        int exclude = dfs(i-1,len,price);
+        
+        return dp[i][len] = Math.max(include, exclude);
+    }
+    public int cutRod(int[] price) {
+        dp = new int[price.length + 1][price.length + 1];
+        for (int i = 0; i <=price.length; i++) {
+            Arrays.fill(dp[i], -1);
+        }
+        return dfs(price.length ,  price.length , price);
+    }
+}
