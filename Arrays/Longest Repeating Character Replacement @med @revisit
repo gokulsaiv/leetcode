@@ -1,0 +1,36 @@
+class Solution {
+    public int findMaxFreq(int[] map){
+        int max = 0 ;
+        for( int i :  map ){
+            if(i > max)max=i;
+        }
+        return max;
+    }
+    public int characterReplacement(String s, int k) {
+        int[]  map = new int[26];
+        int max = 0  , maxfreq = 0, i = 0 , j =0 ;
+        char ch = ' ';
+        while(j < s.length()){
+
+            map[s.charAt(j)-'A']++;
+            if(map[s.charAt(j)-'A'] > maxfreq){
+                ch = s.charAt(j);
+                maxfreq = map[s.charAt(j)-'A'];
+            }
+            
+            if((j-i+1) - maxfreq > k)max= Math.max(max , j-i);
+
+            while((j-i+1) - maxfreq > k){
+                
+                map[s.charAt(i)-'A']--;
+                maxfreq = findMaxFreq(map);
+                i++;
+            }
+            j++;
+        }
+
+        if(k>=0)max= Math.max(max , j-i);
+
+        return max;
+    }
+}
