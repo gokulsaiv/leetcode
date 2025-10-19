@@ -1,0 +1,24 @@
+// User function Template for Java
+
+class Solution {
+    public int longestSubarray(int[] nums, int k) {
+        // code here
+        int numArrays =0 ;
+        int sum =0;
+        Map<Integer,Integer> map = new HashMap<>();
+        map.put(0,-1);
+        
+        for( int i =0 ; i < nums.length ; i++){
+            sum = sum + nums[i];
+            if(map.containsKey( sum  - k)){
+                numArrays = Math.max(numArrays ,i -  map.get( sum - k));
+            }
+            if(!map.containsKey(sum)){
+                map.put(sum ,i);
+            }
+
+        
+        }
+        return numArrays;
+    }
+}
