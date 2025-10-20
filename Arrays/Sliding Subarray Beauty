@@ -1,0 +1,30 @@
+class Solution {
+    public int getxThLargestNum(int[] freq , int X){
+        int x = X;
+        for(int i =0 ; i < 50 ; i++){
+            if(freq[i]>0)x-=freq[i];
+            
+            if(x<=0){
+                
+                return i-50;
+            }
+        }
+        return 0;
+    }
+    public int[] getSubarrayBeauty(int[] nums, int k, int x) {
+        int[] freq = new int[101];
+        int[] ans = new int[nums.length - k + 1];
+        int index =0;
+        for(int i =0 ; i < k ; i++){
+            freq[50+nums[i]]++;
+        }
+        ans[index++] = getxThLargestNum(freq,x);
+        for( int i  = k ; i < nums.length ; i++){
+            freq[50+nums[i]]++;
+            freq[50+nums[i-k]]--;
+            ans[index++] = getxThLargestNum(freq,x);
+        }
+        return ans;
+    }
+
+}
