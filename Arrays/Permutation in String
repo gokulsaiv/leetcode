@@ -1,0 +1,30 @@
+class Solution {
+    public boolean checkInclusion(int[] s1_freq, int[] s2_freq){
+        for( int i =0 ; i < 26 ; i++){
+            if(s1_freq[i]!=s2_freq[i])return false;
+        }
+        return true;
+    }
+    public boolean checkInclusion(String s1, String s2) {
+        if(s1.length() > s2.length())return false;
+        int[] s1_freq = new int[26];
+        int[] s2_freq = new int[26];
+
+        for( int i =0 ; i < s1.length() ; i++){
+            s1_freq[s1.charAt(i) - 'a']++;
+        }
+
+        for( int i =0 ; i < s1.length() ; i++){
+            s2_freq[s2.charAt(i) - 'a']++;
+        }
+
+        if(checkInclusion(s1_freq,s2_freq))return true;
+        int k = s1.length();
+        for( int i =k ; i < s2.length() ; i++){
+            s2_freq[s2.charAt(i-k) - 'a']--;
+            s2_freq[s2.charAt(i) - 'a']++;
+            if(checkInclusion(s1_freq,s2_freq))return true;
+        }
+        return false;
+    }
+}
