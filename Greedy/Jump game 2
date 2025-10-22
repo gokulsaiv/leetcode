@@ -1,0 +1,31 @@
+class Solution {
+    public int jump(int[] nums) {
+        if (nums.length == 1) return 0;
+
+        int jumps = 1;
+        int reach = nums[0];
+        int nextReach = reach;
+        int bestIndex = 0;
+
+        if (reach >= nums.length - 1) return jumps;
+
+        int i = 0;
+        while (i < nums.length) {
+            // Search the best next jump within current reach
+            for (int j = reach; j >= i; j--) {
+                if (j + nums[j] > nextReach) {
+                    nextReach = j + nums[j];
+                    bestIndex = j;
+                }
+            }
+
+            if (reach >= nums.length - 1) break;
+
+            i = bestIndex;
+            reach = nextReach;
+            jumps++;
+        }
+
+        return jumps;
+    }
+}
