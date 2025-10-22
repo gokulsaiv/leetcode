@@ -1,0 +1,16 @@
+class Solution {
+    public int maxArea(int[] nums) {
+        int mostWater =0 , i = 0 , j = nums.length-1;
+        while(i < j){
+            if(nums[j] >  nums[i]){
+                mostWater = Math.max(mostWater ,  (j-i) * nums[i]);
+                i++;
+            }
+            else {
+                mostWater = Math.max(mostWater ,  (j-i) * nums[j]);
+                j--;
+            }
+        }
+        return mostWater;
+    }
+}
