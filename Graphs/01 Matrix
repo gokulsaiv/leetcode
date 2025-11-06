@@ -1,0 +1,50 @@
+class Solution {
+    public int[][] updateMatrix(int[][] mat) {
+            Queue<int[]> q= new LinkedList<>();
+            boolean[][] visited = new boolean[mat.length][mat[0].length];
+
+            for( int c  = 0 ; c < mat.length ; c++){
+                for( int r = 0 ; r < mat[0].length ; r++){
+                    if(mat[c][r]==0){
+                        q.offer( new int[]{c , r , 0});
+                    }
+                }
+            }
+
+            while(!q.isEmpty()){
+                
+                int[] currrent = q.poll();
+                int i = currrent[0];
+                int j = currrent[1];
+                int d = currrent[2];
+
+                visited[i][j] = true;
+
+                if(i!=mat.length-1 && mat[i+1][j] == 1 && !visited[i+1][j]){
+                    mat[i+1][j] = d + 1;
+                    q.offer(new int[]{i+1,j,mat[i+1][j]});
+                    visited[i+1][j] = true;
+                }
+
+                if(i!=0 && mat[i-1][j] == 1 && !visited[i-1][j]){
+                    mat[i-1][j] = d + 1;
+                    q.offer(new int[]{i-1,j,mat[i-1][j]});
+                    visited[i-1][j] = true;
+                }
+
+                if(j!=0 && mat[i][j-1] == 1 && !visited[i][j-1]){
+                    mat[i][j-1] = d + 1;
+                    q.offer(new int[]{i,j-1,mat[i][j-1]});
+                    visited[i][j-1] = true;
+                }
+
+                if(j!=mat[0].length-1 && mat[i][j+1] == 1 && !visited[i][j+1]){
+                    mat[i][j+1] = d + 1;
+                    q.offer(new int[]{i,j+1,mat[i][j+1]});
+                    visited[i][j+1] = true;
+                }
+
+            }
+            return mat;
+    }
+}
