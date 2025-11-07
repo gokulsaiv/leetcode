@@ -1,0 +1,25 @@
+at most k odd - at most k-1  =  nice subarrays
+class Solution {
+    public int niceSubarraysCounter(int[] nums , int k){
+        int counter = 0 ,  odds = 0 ;
+        int i = 0 , j = 0 ;
+        // Map<Integer, Integer> map = new HashMap<>();
+        while(j < nums.length){
+            if(nums[j]%2!=0)odds++;
+
+            while(odds>k){
+                if(nums[i]%2!=0)odds--;
+                i++;
+            }
+
+            if(odds<=k)counter+=(j-i+1);
+            j++;
+        } 
+        return counter;
+    }
+    public int numberOfSubarrays(int[] nums, int k) {
+        int atMostK = niceSubarraysCounter(nums,k);
+        int atMostkMinusOne = niceSubarraysCounter(nums,k-1);
+        return atMostK - atMostkMinusOne;
+    }
+}
