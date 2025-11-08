@@ -1,0 +1,22 @@
+// User function Template for Java
+//  1 3 4 5 7 
+class Solution {
+    long countTriplets(int n, int sum, long nums[]) {
+        long triplets = 0 ;
+        Arrays.sort(nums);
+        for( int i = 0 ; i < nums.length -1 ; i++){
+            int j = i+1;
+            int k = nums.length-1;
+            while( j < k){
+                while((nums[i] + nums[j] + nums[k] >= sum) &&  (j < k ))k--;
+                if(j < k){
+                   triplets+=(k-j);
+                    j++;
+                     
+                }
+                
+            }
+        }
+        return triplets;
+    }
+}
