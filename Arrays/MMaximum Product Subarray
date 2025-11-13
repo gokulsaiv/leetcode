@@ -1,0 +1,25 @@
+class Solution {
+    
+    public int maxProduct(int[] nums) {
+        if(nums.length == 1)return nums[0];
+
+       
+        // from front
+        int fproduct = 1 , rproduct = 1;
+        int forntMax = 0 ,  rearMax = 0 ;
+        for(int i = 0 ; i < nums.length ; i++){
+            
+            fproduct = fproduct * nums[i];
+            rproduct = rproduct * nums[nums.length-1-i];
+
+            forntMax = Math.max(forntMax,fproduct);
+            rearMax = Math.max(rearMax,rproduct);
+
+            if(fproduct == 0)fproduct = 1;
+
+            if(rproduct == 0)rproduct = 1;
+        }
+        
+        return Math.max(forntMax,rearMax);
+    }
+}
