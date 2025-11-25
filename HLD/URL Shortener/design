@@ -1,0 +1,203 @@
+🌐 URL Shortener – Final Polished System Design (Full Notes)
+1. Architecture Overview (Multi-Region Active-Active)
+
+Each region runs an independent stack:
+
+API Gateway
+
+Service Discovery
+
+Shortener Service (write path)
+
+Redirect Service (read path)
+
+Cache (Redis-like, read-through + write-through)
+
+DB: Master + Replicas (NoSQL KV store)
+
+Local failover DB
+
+Global routing uses:
+
+DNS → routes to nearest CDN endpoint
+
+CDN → routes to nearest region
+
+Each region is mostly autonomous.
+
+2. The Core Problem You Identified: Global Uniqueness
+
+Your question:
+“If each region is independent, how do we guarantee that the short URL is globally unique?”
+
+Answer (Final Solution)
+
+Use a Snowflake-like ID generator, which produces:
+
+timestamp bits + region id bits + local counter bits
+
+
+This ID is globally unique without any cross-region communication.
+
+How you use it in YOUR design
+
+When a long URL arrives:
+
+Region generates a Snowflake ID → includes the region prefix
+
+Append the Snowflake ID or embed its bits into the URL before hashing
+
+Hash the result → Base62 encode → produce the short code
+
+This ensures:
+
+No collisions between regions
+
+Even if the same long URL is submitted in different regions → different short URLs are acceptable
+
+Zero coordination cost between regions
+
+This is the cleanest SDE-1-ready explanation.
+
+3. The Second Problem: User in Region B accessing URL from Region A
+
+Your question:
+“If the actual URL data is stored only in one region’s DB, how does another region access it?”
+
+Answer: Global Mapping Layer (Distributed KV Directory)
+
+A lightweight global key-value store that stores:
+
+short_code → region_owner
+
+
+This is tiny.
+Example size math:
+
+Each entry ~ 50 bytes
+
+Even 1B URLs → ~50GB globally distributed
+
+Very cheap for modern caches
+
+How it works:
+
+Region A creates the short URL
+
+Region A inserts (short_code → Region A) into global mapping cache
+
+A user in Region B hits short_code
+
+Region B checks global mapping
+
+It sees: stored in Region A
+
+Region B redirects request to Region A’s redirect service
+
+Region A returns the long URL
+
+This avoids global DB replication.
+
+4. Your Concern: Will Mapping Lookup Increase Latency?
+
+Your question:
+“Does the global lookup layer make things slow?”
+
+Answer
+
+Only a single, tiny distributed cache lookup happens.
+Latency per lookup: ~1–3 ms across regions.
+
+This is negligible compared to:
+
+DB reads
+
+Network head travel
+
+Server processing
+
+CDNs/CDSs already do far more lookups in real systems.
+
+5. Your Concern: Is the Mapping Layer Too Big?
+
+Your question:
+“Storing mappings for billions of URLs—doesn’t that make the cache huge?”
+
+Answer
+
+No. Because the mapping entries are micro-sized.
+
+Rough calculations:
+
+1B entries × 50 bytes ≈ 50 GB
+
+Replication 3× → ~150 GB globally
+
+Distributed across many nodes → peanuts for a global system
+
+This is tiny compared to normal cache clusters.
+
+6. Your Question: Should You Know Snowflake Deeply?
+Answer
+
+No.
+
+For SDE-1, this is enough:
+
+“Snowflake ID = timestamp + region bits + increment counter.
+We Base62 encode it to produce globally unique short codes.”
+
+Understanding the basic idea is enough to impress the interviewer.
+
+7. Failover Question: What Happens if Region A Goes Down?
+
+Your question:
+“If Region A goes down, how do users access URLs created in Region A?”
+
+Answer
+
+Two options (both acceptable):
+
+Option 1 — DNS Shift / Region Promotion (simplest for SDE-1)
+
+Failover replicas inside Region A get promoted
+
+Region A stays isolated but recovers
+
+No cross-region data movement
+
+Option 2 — Cross-region replication of hot URLs (advanced)
+
+Popular URLs can be replicated to multiple regions asynchronously
+
+Reduces global hotspots and failover impact
+
+For SDE-1, Option 1 is perfect.
+
+8. The Final Flow (End-to-End)
+Create Short URL Flow
+
+User → CDN → Region A → Shortener SVC → Generate Snowflake → Hash/Encode →
+Write to cache + DB → Add mapping (shortcode → Region A) → Return short URL.
+
+Redirect Flow
+
+User → CDN → Region X → Redirect SVC (Region X)
+→ Check local cache → If miss → Check global mapping
+→ Route to Region A → Get long URL → Redirect user → Cache locally.
+
+9. What Makes This Design Correct
+
+Each region generates unique IDs → removes collisions
+
+Global mapping instead of global DB replication → scalable
+
+CDN + DNS used properly → low-latency global routing
+
+Cache-first read → fast hot URL redirects
+
+No complex joins or queries → NoSQL KV store ideal
+
+Failover handled regionally → simple and robust
+
+This is exactly the level expected of an SDE-1 candidate at Amazon/Meta/Google.
