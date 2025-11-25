@@ -1,0 +1,205 @@
+Rate Limiter – System Design Summary
+1. Purpose
+
+A rate limiter controls how many requests a client can make to a service within a defined time window. It protects downstream services from overload and ensures fair usage.
+
+2. High-Level Approaches
+a. Token Bucket (your chosen design)
+
+A bucket holds tokens; each request consumes one.
+Tokens are added at a fixed rate.
+If the bucket is empty → request is rejected.
+
+Why it’s preferred:
+Smooth request distribution, handles bursts, predictable.
+
+b. Leaky Bucket (for comparison)
+
+Requests enter a queue and leak out at a fixed rate.
+Good for producing a steady outgoing rate.
+
+c. Fixed Window Counter
+
+Simple but suffers boundary issues.
+
+d. Sliding Window Log / Sliding Window Counter
+
+More accurate; high memory cost depending on scale.
+
+3. Your Design Using Token Bucket
+Key Requirements
+
+Support millions of client requests.
+
+Rate limit per user or per IP.
+
+Scalable horizontally.
+
+Consistent throttling across multiple servers.
+
+4. Components
+a. API Gateway / Ingress
+
+First point of contact.
+Extracts client identifier (IP, API key, userID).
+
+b. Distributed Cache (Redis)
+
+Acts as the shared storage for token buckets.
+Stores:
+
+current token count
+
+last refill timestamp
+
+Redis operations must be atomic.
+
+c. Limiter Service (Your core logic)
+
+Implements:
+
+calculate tokens to add since last request
+
+cap tokens to maxBucketSize
+
+check if token >= 1
+
+update Redis
+
+allow/deny request
+
+send metrics/logs
+
+You emphasized careful cleanup of expired entries to prevent unbounded growth.
+
+5. Token Bucket Algorithm (Detailed)
+On each request:
+
+Read bucket from Redis.
+
+Calculate elapsed_time = currentTime - lastRefillTime.
+
+Compute tokens_to_add = elapsed_time * refillRate.
+
+new_tokens = min(maxCapacity, old_tokens + tokens_to_add).
+
+If new_tokens < 1: reject.
+
+Else:
+
+new_tokens -= 1
+
+update Redis with new token count + lastRefillTime = now
+
+Forward request.
+
+Why this works:
+
+No fixed window boundaries.
+Natural smoothing of bursts.
+Configurable capacity + refill rate.
+
+6. Data Model in Redis
+
+Key: rate_limit:{clientId}
+Value:
+
+{
+  tokens: float,
+  lastRefillTs: epoch_ms
+}
+
+
+Operations use Lua scripts or Redis transactions to ensure atomicity.
+
+7. Cleanup Strategy
+
+You proposed periodic cleanup to prevent unused buckets from living forever.
+
+Approach:
+
+Store TTL on Redis keys (slightly > refill window).
+
+Redis auto-expires keys for inactive clients.
+
+Optional background cleanup worker.
+
+8. Scaling Strategy
+a. Horizontal Scaling
+
+All app servers query the same Redis cluster.
+Consistency: Redis keeps token counters correct across nodes.
+
+b. Sharding Redis
+
+If scale increases, shard by clientId hash.
+
+c. Multi-Region
+
+Use region-local rate limiting to avoid cross-region latency.
+If global limit is required:
+
+Use CRDT counters (Redis Enterprise) or
+
+Hierarchical limiting (global + local buckets).
+
+9. Failure Scenarios
+Redis down
+
+Options:
+
+Fail-open (let all traffic pass; risky)
+
+Fail-closed (block all traffic; safe but harsh)
+
+Hybrid based on endpoint criticality
+
+Clock drift
+
+Use server time, not client time.
+
+Thundering herd
+
+Use pipelining or Lua scripts for atomic operations.
+
+10. Observability
+Metrics
+
+requests allowed/denied
+
+Redis latency
+
+bucket refill rate accuracy
+
+per-user throttle %
+
+Logs
+
+throttle events
+
+anomalies
+
+latency spikes
+
+Dashboards
+
+Helps diagnose over-throttling or misconfigurations.
+
+11. Example Config
+maxTokens = 100
+refillRate = 10 tokens/second
+bucketTTL = 20 seconds
+
+12. Strengths of Your Design
+
+Burst handling with bounded max capacity
+
+Accurate time-based refill
+
+Atomic updates using Redis
+
+Auto cleanup with TTL
+
+Works with multiple web servers
+
+Leverages existing cache infra (no heavy DB ops)
