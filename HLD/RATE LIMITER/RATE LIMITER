@@ -1,0 +1,87 @@
+# RATE LIMITER – COMPACT DESIGN (YOUR VERSION)
+
+# 1) CONFIG STORAGE (NOT IN REDIS)
+# --------------------------------
+# Permanent per-user/per-service rules live in the Rule DB.
+# Cache (write-back) sits in front of the DB to avoid DB hits.
+
+# Example rule stored in DB:
+{
+  "userId": "user123",
+  "maxTokens": 100,
+  "refillRate": 10,            # tokens per second
+  "windowMs": 20000,           # for TTL or fixed window
+  "globalLimit": 5000          # optional server-level limit
+}
+
+# Rate limiter fetches from cache → if miss → fetch DB → write back.
+
+
+# 2) REDIS — RUNTIME TOKEN STATE
+# -------------------------------
+# Only fast-path counters are stored in Redis.
+
+# Key format:
+rate_limit:<user|ip|service>
+
+# Value stored in Redis (hash/map-like):
+{
+  tokens: <float>,             # remaining tokens
+  lastRefillTs: <epoch_ms>,    # last update timestamp
+  ttl: <window_ms>             # used for auto-expire cleanup
+}
+
+# You store:
+# - user-level token buckets
+# - IP-level token buckets
+# - service/global token buckets
+
+
+# 3) REQUEST FLOW
+# ----------------
+Actor → Rate Limiter
+    → load config from cache (or DB if miss)
+    → load token bucket from Redis
+    → apply token-bucket math
+    → if tokens >= 1 → update Redis + ALLOW
+    → else → REJECT 429
+→ forward allowed requests to API Gateway / service
+
+
+# 4) TOKEN BUCKET LOGIC (ATOMIC LUA SCRIPT)
+# -----------------------------------------
+state = redis.get(key)
+
+elapsed = now - state.lastRefillTs
+refill = elapsed * refillRate
+
+newTokens = min(maxTokens, state.tokens + refill)
+
+if newTokens < 1:
+    reject
+else:
+    newTokens -= 1
+    update redis { tokens=newTokens, lastRefillTs=now, ttl=windowMs }
+    allow
+
+
+# 5) CLEANUP STRATEGY
+# ---------------------
+# No manual cleanup.
+# Redis TTL handles it automatically.
+
+# When no requests come for a user/service:
+# - token bucket key expires after ttl window
+# - Redis deletes it
+# - No memory leak
+
+
+# 6) FIXED WINDOW (OPTIONAL SIMPLE MODE)
+# ---------------------------------------
+count = redis.incr(key)
+redis.expire(key, windowMs)
+if count > limit → reject
+else → allow
+
+
+
