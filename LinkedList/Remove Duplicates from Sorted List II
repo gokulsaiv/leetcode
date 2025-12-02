@@ -1,0 +1,26 @@
+class Solution {
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode newList = new ListNode(-1);
+        ListNode copy = newList;
+        ListNode temp = head;
+        while(temp!=null && temp.next!=null){
+            if(temp.val!=temp.next.val){
+                copy.next = temp;
+                copy = copy.next;
+                temp = temp.next;
+                copy.next = null;
+            }
+            else{
+                ListNode start = temp;
+                ListNode end = temp;
+                while(end!=null && start.val == end.val){
+                    end = end.next;
+                }
+                temp = end;
+               
+            }
+        }
+        if(temp!=null)copy.next = temp;
+        return newList.next;
+    }
+}
