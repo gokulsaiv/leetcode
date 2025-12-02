@@ -1,0 +1,22 @@
+class Solution {
+    public ListNode resverseList(ListNode root){
+        if(root.next==null)return root;
+        ListNode head =resverseList(root.next);
+        root.next.next = root;
+        root.next =  null;
+        return head;
+    }
+    public int getDecimalValue(ListNode head) {
+        if(head == null)return  0;
+        
+        ListNode newHead = resverseList(head);
+        int decimalValue = 0 , power = 0 ;
+        while(newHead!=null){
+            decimalValue =  decimalValue + newHead.val * (int)Math.pow(2,power);
+            
+            newHead = newHead.next;
+            power++;
+        }
+        return decimalValue;
+    }
+}
