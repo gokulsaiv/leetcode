@@ -1,0 +1,116 @@
+Based on the transcript provided, here is the exact chronological order of the discussion points. This structure is designed to guide you from high-level requirements to deep technical implementation during a System Design interview.
+
+Phase 1: Requirement Gathering & Scoping
+1. Identify the Customer (Actors)
+
+Clarify who you are designing for.
+
+Example: For a cab app, are you designing the Driver app, the Rider app, or the Admin dashboard?
+
+2. Clarify the Scope (Module Focus)
+
+Acknowledge that you cannot design the entire system in 45 minutes.
+
+Ask the interviewer which specific module to focus on.
+
+Example: For a food app, focus on "Restaurant Listing" vs. "Delivery Logistics" vs. "Checkout."
+
+3. Capacity Estimation (Scale)
+
+Determine the scale (DAU/MAU, requests per second).
+
+Determine the geography (India-only vs. Global).
+
+Why: This dictates immediate decisions on Database choices, Caching, and CDNs.
+
+4. CAP Theorem Assessment (Trade-offs)
+
+Explicitly ask or decide: Consistency vs. Availability.
+
+Example: Banking needs Consistency; Social Media feeds usually prefer Availability.
+
+Tip: Discussing this early impresses interviewers because it justifies your later architecture choices.
+
+Phase 2: High-Level Design & Architecture
+5. Sequence of Events (User Flow)
+
+Map out the journey for the specific module you picked in Step 2.
+
+Example: Open App -> Filter -> Select Item -> Add to Cart -> Payment -> Assign Delivery Partner.
+
+6. API Design
+
+Define the contract. Who sends the request? Who fulfills it?
+
+Be specific about request parameters and response bodies.
+
+7. Microservices Architecture
+
+Define the services based on the APIs.
+
+Draw the boxes: Load Balancers -> Service A / Service B.
+
+Assign responsibilities to specific microservices.
+
+8. Communication Protocols (Client <-> Server)
+
+How does data move between the client and backend?
+
+Client to Server: Usually HTTP/HTTPS.
+
+Server to Client: Discuss WebSockets or Long Polling for real-time updates (e.g., driver location, order status).
+
+Phase 3: Data & Storage
+9. Data Flow & Identification
+
+Identify exactly what data is moving through the system.
+
+Map which microservices own which data.
+
+10. Database Selection
+
+Choose the specific technology (SQL vs. NoSQL).
+
+Justification: Refer back to your earlier decisions on Scale (Step 3) and CAP Theorem (Step 4) to defend your choice (e.g., "I chose NoSQL because we prioritized Availability and write-heavy loads").
+
+Phase 4: Scaling & Reliability (Deep Dive)
+11. Scaling Strategy
+
+Horizontal vs. Vertical Scaling.
+
+Caching: Redis/Memcached implementation.
+
+Sharding: especially for SQL databases. Discuss the Sharding Key (e.g., UserID vs. GeoID) and Consistent Hashing.
+
+CDN: If the audience is global (from Step 3).
+
+12. Resiliency & Fault Tolerance
+
+What happens if a DB or Service goes down?
+
+Discuss Master-Slave architectures, Replication, and Peer-to-Peer redundancy.
+
+Phase 5: Operational Excellence (The "Bonus" Points)
+13. Health Checks
+
+How do you know the system is alive?
+
+Mention heartbeats or ping mechanisms to ensure microservices and DBs are active.
+
+14. Logging & Monitoring
+
+Note: The speaker mentions this is often ignored but critical.
+
+Design a separate service for ingesting logs and monitoring metrics for analysis.
+
+15. Internal Communication Optimization
+
+Service-to-Service communication:
+
+Discuss minimizing overhead. Instead of HTTPS, consider binary protocols (like gRPC) or HTTP without TLS for internal private networks to save latency.
+
+16. Algorithms & Data Structures
+
+Context specific: If the module requires complex logic (e.g., "Find nearest driver" or "Shortest delivery path"), discuss the specific algorithm (e.g., QuadTrees, Dijkstra’s) here.
+
+Next Step: Would you like to practice this flow by picking a standard problem (like "Design Instagram" or "Design Uber") and walking through the first 3 steps (Actors, Scope, and Capacity) right now?
