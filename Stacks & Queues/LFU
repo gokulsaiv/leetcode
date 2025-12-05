@@ -1,0 +1,143 @@
+import java.util.*;
+
+class Node {
+    int freq;
+    int val;
+    int key;
+    Node next;
+    Node prev;
+
+    // Fixed: Constructor arguments
+    Node(int key, int val) {
+        this.freq = 1;
+        this.key = key;
+        this.val = val;
+    }
+}
+
+class FreqLru {
+    Node head;
+    Node tail;
+
+    FreqLru() {
+        // Fixed: Node constructor requires 2 arguments
+        this.head = new Node(-1, -1);
+        this.tail = new Node(-1, -1);
+        this.head.next = this.tail;
+        this.tail.prev = this.head;
+    }
+
+    public Node[] getList() {
+        Node[] l = new Node[2];
+        l[0] = this.head;
+        l[1] = this.tail;
+        return l;
+    }
+}
+
+class LFUCache {
+    int capacity;
+    int size;
+    Map<Integer, Node> map;
+    // Fixed: Must use TreeMap explicitly to access firstKey()
+    TreeMap<Integer, Node[]> freqList; 
+
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        this.size = 0;
+        this.map = new HashMap<>();
+        this.freqList = new TreeMap<>();
+        // Note: We don't need to pre-fill freqList with 1 here.
+        // We create lists dynamically as needed.
+    }
+
+    public void insertAtHead(Node head, Node n) {
+        n.next = head.next;
+        n.prev = head;
+        head.next.prev = n;
+        head.next = n;
+    }
+
+    public void removeNode(Node node) {
+        node.next.prev = node.prev;
+        node.prev.next = node.next;
+    }
+
+    public int get(int key) {
+        if (!map.containsKey(key)) return -1;
+
+        Node currNode = map.get(key);
+        int currentFreq = currNode.freq; // Fixed variable name for clarity
+
+        // 1. Remove from current frequency list
+        removeNode(currNode);
+        
+        // 2. Clean up empty frequency lists
+        Node[] currNodeCache = freqList.get(currentFreq);
+        // Check if head.next is tail (list is empty)
+        if (currNodeCache[0].next == currNodeCache[1]) {
+            freqList.remove(currentFreq);
+        }
+
+        // 3. Move to next frequency
+        currNode.freq++; // Increment frequency
+        int newFreq = currNode.freq;
+        
+        if (!freqList.containsKey(newFreq)) {
+            FreqLru newList = new FreqLru();
+            freqList.put(newFreq, newList.getList());
+        }
+
+        Node newListHead = freqList.get(newFreq)[0];
+        insertAtHead(newListHead, currNode);
+
+        return currNode.val;
+    }
+
+    public void put(int key, int value) {
+        if (capacity == 0) return; // Edge case
+
+        // CASE 1: Key already exists -> Update value and Freq
+        if (map.containsKey(key)) {
+            Node node = map.get(key);
+            node.val = value; // Update value
+            get(key); // Use get() to handle the frequency increment logic
+            return;
+        }
+
+        // CASE 2: Key is new -> Insert
+        if (size >= capacity) {
+            // Evict LFU element
+            // Fixed: use firstKey(), not getFirstKey()
+            int minFreq = freqList.firstKey(); 
+            Node[] lfuCacheList = freqList.get(minFreq);
+            Node tail = lfuCacheList[1];
+            
+            // LOGIC BUG FIX: You were trying to remove the Tail sentinel. 
+            // You must remove the node BEFORE the tail.
+            Node toDelete = tail.prev; 
+            
+            removeNode(toDelete);
+            map.remove(toDelete.key); // CRITICAL: Remove from the main map too!
+            size--;
+
+            if (lfuCacheList[0].next == lfuCacheList[1]) {
+                freqList.remove(minFreq);
+            }
+        }
+
+        // Add new Node
+        // Fixed: passed 'value' not 'val'
+        Node newNode = new Node(key, value); 
+        map.put(key, newNode);
+        
+        if (!freqList.containsKey(1)) {
+            FreqLru newList = new FreqLru();
+            freqList.put(1, newList.getList());
+        }
+        
+        Node newListHead = freqList.get(1)[0];
+        insertAtHead(newListHead, newNode);
+        size++;
+    }
+}
