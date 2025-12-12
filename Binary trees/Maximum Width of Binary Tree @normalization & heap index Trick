@@ -1,0 +1,43 @@
+class NodeHd {
+    long hd;
+    TreeNode n;
+    NodeHd(long hd , TreeNode n){
+        this.hd = hd;
+        this.n = n;
+    }
+}
+
+class Solution {
+    public int widthOfBinaryTree(TreeNode root) {
+        Queue<NodeHd> q = new LinkedList<>();
+        q.offer(new NodeHd(0, root));      // start from 0 to avoid overflow
+        long maxWidth = 0;
+        
+        while (!q.isEmpty()) {
+            int len = q.size();
+            long minHd = q.peek().hd;      // normalization anchor
+            long first = 0, last = 0;
+
+            for (int i = 0; i < len; i++) {
+                NodeHd node = q.poll();
+                TreeNode n = node.n;
+
+                long hd = node.hd - minHd;   // normalize: the key fix
+
+                if (i == 0) first = hd;
+                if (i == len - 1) last = hd;
+
+                if (n.left != null) {
+                    q.offer(new NodeHd(hd * 2, n.left));
+                }
+                if (n.right != null) {
+                    q.offer(new NodeHd(hd * 2 + 1, n.right));
+                }
+            }
+
+            maxWidth = Math.max(maxWidth, last - first + 1);
+        }
+
+        return (int)maxWidth;
+    }
+}
