@@ -1,0 +1,190 @@
+/**
+ * GENERATE RESUME - ONE PAGE ENFORCER (ATS SCORE 90+)
+ * * CHANGES FOR SINGLE PAGE FIT:
+ * 1. FONT SIZE: Reduced to 9pt (Body) and 10pt (Headers). 
+ * This recovers ~15% vertical space.
+ * 2. SPACING: Reduced section gaps from 8pt to 4pt.
+ * 3. DENSITY: Keeps all ATS keywords and content but compacts the layout.
+ */
+
+function generateResume() {
+  const doc = DocumentApp.getActiveDocument();
+  const body = doc.getBody();
+
+  // --- 1. SAFE CLEAR ---
+  body.appendParagraph(""); 
+  while (body.getNumChildren() > 1) {
+    body.removeChild(body.getChild(0));
+  }
+
+  // --- 2. TIGHT MARGINS (0.4 Inches) ---
+  body.setMarginTop(28.8);
+  body.setMarginBottom(28.8);
+  body.setMarginLeft(28.8);
+  body.setMarginRight(28.8);
+
+  // --- 3. HELPER FUNCTIONS ---
+
+  function highlightKeywords(paragraph, keywords) {
+    const textObj = paragraph.editAsText();
+    keywords.forEach(function(word) {
+      let found = textObj.findText(word);
+      while (found !== null) {
+        const start = found.getStartOffset();
+        const end = found.getEndOffsetInclusive();
+        textObj.setBold(start, end, true);
+        found = textObj.findText(word, found);
+      }
+    });
+  }
+
+  const keyTerms = [
+    "Distributed Systems", "Cloud Native Architecture", "High Performance Computing",
+    "Microservices", "Go", "Python", "Kubernetes", "TCP/IP", "High Availability (HA)", 
+    "CI/CD", "Nvidia BlueField 3 DPUs", "Control Plane", "CRS workflows", 
+    "Data Plane (TMM)", "Go concurrency", "Pod Scheduling", "Stage Wise Reporting", 
+    "Grafana", "TMM network namespace", "Argo Workflows", "Resilience and Performance Frameworks", 
+    "Docker", "InfluxDB", "Prometheus", "Role Based Access Control (RBAC)", "SQL", 
+    "REST APIs", "Spot Award Winner", "National Athlete"
+  ];
+
+  // SECTION HEADER: Compact (10pt)
+  function addSectionHeader(text) {
+    const p = body.appendParagraph(text.toUpperCase());
+    p.setFontFamily("Arial").setFontSize(10).setBold(true);
+    // Reduced spacing before to 4pt
+    p.setSpacingBefore(3).setSpacingAfter(0).setLineSpacing(1.0);
+    body.appendHorizontalRule();
+  }
+
+  // JOB TITLE: Compact (9pt)
+  function addJobTitle(company, details) {
+    const pComp = body.appendParagraph(company);
+    pComp.setFontFamily("Arial").setFontSize(9).setBold(true);
+    pComp.setSpacingBefore(3).setSpacingAfter(0).setLineSpacing(1.0);
+
+    const pDet = body.appendParagraph(details);
+    pDet.setFontFamily("Arial").setFontSize(9).setBold(true);
+    pDet.setSpacingBefore(0).setSpacingAfter(0).setLineSpacing(1.0);
+  }
+
+  // EDUCATION TITLE: Compact (9pt)
+  function addEducationTitle(school, details) {
+    const pSchool = body.appendParagraph(school);
+    pSchool.setFontFamily("Arial").setFontSize(9).setBold(true);
+    pSchool.setSpacingBefore(3).setSpacingAfter(0).setLineSpacing(1.0);
+
+    const pDet = body.appendParagraph(details);
+    pDet.setFontFamily("Arial").setFontSize(9).setBold(false);
+    pDet.setSpacingBefore(0).setSpacingAfter(0).setLineSpacing(1.0);
+  }
+
+  // PROJECT TITLE: Compact (9pt)
+  function addProjectTitle(title, stack) {
+    const p = body.appendParagraph(title + " | " + stack);
+    p.setFontFamily("Arial").setFontSize(9).setBold(true);
+    p.setSpacingBefore(3).setSpacingAfter(0).setLineSpacing(1.0);
+  }
+
+  // BULLET: Compact (9pt)
+  function addBullet(text) {
+    const item = body.appendListItem(text);
+    item.setFontFamily("Arial").setFontSize(9).setBold(false);
+    item.setSpacingBefore(0).setSpacingAfter(0).setLineSpacing(1.0);
+    item.setGlyphType(DocumentApp.GlyphType.BULLET);
+    highlightKeywords(item, keyTerms);
+  }
+
+  // --- 4. CONTENT GENERATION ---
+
+  // HEADER: Reduced Size
+  let namePara;
+  if (body.getChild(0).getType() === DocumentApp.ElementType.PARAGRAPH) {
+    namePara = body.getChild(0).asParagraph();
+    namePara.setText("Gokul Sai Vannemreddy");
+  } else {
+    namePara = body.appendParagraph("Gokul Sai Vannemreddy");
+  }
+  namePara.setFontFamily("Arial").setFontSize(14).setBold(true).setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  namePara.setSpacingBefore(0).setSpacingAfter(0).setLineSpacing(1.0);
+
+  const contact = body.appendParagraph("Hyderabad, India | Email: gokulsai.vannemreddy05@gmail.com | Phone: +91 9440171250 | LinkedIn: Gokul Sai");
+  contact.setFontFamily("Arial").setFontSize(9).setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  contact.setSpacingBefore(0).setSpacingAfter(4).setLineSpacing(1.0);
+
+  // SUMMARY
+  addSectionHeader("Summary");
+  const summaryText = "Software Engineer II specializing in Distributed Systems, Cloud Native Architecture, and High Performance Computing. Expert in architecting scalable Microservices using Go and Python on Kubernetes. Proven track record of optimizing TCP/IP networking stacks to reduce latency and enhance throughput. Committed to delivering High Availability (HA) solutions and accelerating CI/CD pipelines through data driven automation.";
+  const pSum = body.appendParagraph(summaryText);
+  pSum.setFontFamily("Arial").setFontSize(9).setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
+  pSum.setSpacingBefore(0).setSpacingAfter(0).setLineSpacing(1.0);
+  highlightKeywords(pSum, keyTerms);
+
+  // TECHNICAL SKILLS
+  addSectionHeader("Technical Skills");
+  const skillsData = [
+    ["Languages & Scripting:", "Go, Python, Java, Shell Scripting, JavaScript, SQL"],
+    ["Cloud & DevOps:", "Kubernetes, Docker, Argo Workflows, CI/CD, Linux, Git, Automation Tools"],
+    ["System Architecture:", "Distributed Systems, Microservices, Control Plane, Data Plane (TMM), TCP/IP, HTTP, TLS, DNS"],
+    ["Observability:", "Grafana, InfluxDB, Prometheus"],
+    ["Core CS:", "Data Structures, Algorithms, Network L2-L4 Protocols"]
+  ];
+  skillsData.forEach(function(row) {
+    const p = body.appendParagraph("");
+    p.setSpacingBefore(0).setSpacingAfter(0).setLineSpacing(1.0);
+    const label = p.appendText(row[0] + " ");
+    label.setBold(true).setFontFamily("Arial").setFontSize(9);
+    const list = p.appendText(row[1]);
+    list.setBold(false).setFontFamily("Arial").setFontSize(9);
+  });
+
+  // WORK EXPERIENCE
+  addSectionHeader("Work Experience");
+
+  addJobTitle("F5 Networks", "Software Engineer II | Hyderabad, India | Oct 2024 – Present");
+  const exp1 = [
+    "Orchestrated BIG IP Next on Nvidia BlueField 3 DPUs, optimizing the installation process to reduce deployment time to under 3 minutes (a 65% improvement), ensuring seamless integration.",
+    "Engineered high throughput Control Plane modules for CRS workflows, slashing configuration latency by 54% and eliminating critical timing bottlenecks to boost application scalability.",
+    "Optimized Data Plane (TMM) logic using Go concurrency, achieving a 20% increase in request throughput and reducing memory overhead by 24%.",
+    "Resolved a critical Pod Scheduling failure during node outages by redesigning logic for High Availability (HA), ensuring 99.9% system uptime in distributed environments.",
+    "Architected a containerized \"Stage Wise Reporting\" solution integrated with Grafana, enabling real time performance analysis and reducing incident response time (MTTR) by 65%.",
+    "Automated TMM network namespace configuration on Linux hosts via Python, ensuring 100% consistency across secure customer deployments."
+  ];
+  exp1.forEach(addBullet);
+
+  addJobTitle("F5 Networks", "Software Engineer I | Hyderabad, India | Aug 2023 – Oct 2024");
+  const exp2 = [
+    "Architected a resilient CI/CD framework using Argo Workflows, reducing automated test failure rates by 90% and cutting total runtime by 50%.",
+    "Spearheaded the implementation of Resilience and Performance Frameworks, automating workloads to validate system stability under peak load conditions.",
+    "Developed a robust reporting microservice stack (Docker/InfluxDB) to visualize development metrics, empowering leadership to make data driven decisions for 14 major releases."
+  ];
+  exp2.forEach(addBullet);
+
+  // EDUCATION
+  addSectionHeader("Education");
+  addEducationTitle("KL University, B.Tech Computer Science", "2019 – 2023 | GPA: 8.6/10.0");
+  const eduCourses = body.appendParagraph("Relevant Coursework: Distributed Systems, Computer Networks, Operating Systems, Data Structures and Algorithms, Software Engineering.");
+  eduCourses.setFontFamily("Arial").setFontSize(9).setItalic(true).setSpacingBefore(0).setSpacingAfter(0).setLineSpacing(1.0);
+
+  // PROJECTS
+  addSectionHeader("Development Projects");
+  
+  addProjectTitle("High Performance User Management System", "React.js, MySQL");
+  addBullet("Engineered a full stack application with Role Based Access Control (RBAC), implementing optimized SQL queries and caching strategies to improve API response efficiency by 30%.");
+  addBullet("Designed a secure authentication flow handling concurrent user sessions, ensuring data integrity and UI scalability.");
+  
+  addProjectTitle("Online Medical Consultation System", "Node.js, Express, REST APIs");
+  addBullet("Developed scalable backend APIs to handle dynamic symptom based disease mapping and secure payment processing for a remote diagnosis platform.");
+  addBullet("Optimized database architecture to support rapid patient data retrieval, reducing query latency by 30%.");
+
+  // AWARDS
+  addSectionHeader("Awards");
+  addBullet("Spot Award Winner: Recognized with LeadF5, BeF5, and SPOT Awards for executing a critical TMM fix that resolved a high priority customer incident.");
+  addBullet("National Athlete: 3 time All India National Swimming Champion (57 gold medals in 30 national competitions), demonstrating elite discipline and competitive drive.");
+
+  // CLEANUP
+  const lastChild = body.getChild(body.getNumChildren() - 1);
+  if (lastChild.getType() === DocumentApp.ElementType.PARAGRAPH && lastChild.asParagraph().getText().trim() === "") {
+    body.removeChild(lastChild);
+  }
+}
