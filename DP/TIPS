@@ -1,3 +1,9 @@
 Time Complexity 
 Dp =O(Total Number of States×Time to Compute One State)
 - This is basically the size of the memo table as this is the max number state it can have and can tco oyt side and each state is calculatd once
+
+unbounded knapsack probelms :  you solve them intially with out own pen and paper debugging but 
+trick : choose and stay on the same index , becasue agin i can ask my self after chossing it once can i choose this or not ? if it lying int the knapsack kacacity
+
+- 0s and couunt number of subsquences probelms with target k , if that target can be made and if the arraya container 0 then we have a porblm run the dp with 0s eleimate them ar the 
+chosse part chosse only if they are non 0 and at the end we can do pow(2,zeroes) beasue it again a chose and not chosse game beacuse they are at diff indexes
