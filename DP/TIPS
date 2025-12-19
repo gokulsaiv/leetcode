@@ -7,3 +7,40 @@ trick : choose and stay on the same index , becasue agin i can ask my self after
 
 - 0s and couunt number of subsquences probelms with target k , if that target can be made and if the arraya container 0 then we have a porblm run the dp with 0s eleimate them ar the 
 chosse part chosse only if they are non 0 and at the end we can do pow(2,zeroes) beasue it again a chose and not chosse game beacuse they are at diff indexes
+
+
+DP Direction: 0 → n-1 vs n-1 → 0
+
+There are two common ways to define DP states, and the direction follows the definition.
+
+1) 0 → n-1 (prefix / forward DP)
+
+dp[i] represents the answer up to index i
+
+You must initialize starting states (like dp[0])
+
+Transitions depend on previous indices
+
+Typical in problems like grid DP, knapsack, LIS
+
+2) n-1 → 0 (future / backward DP)
+
+dp[i] represents the answer from index i onward
+
+Base case is at the end (i >= n → 0)
+
+Transitions depend on future indices (i+1, i+2)
+
+Used in stock DP, decision-based problems
+
+Why stock DP uses n-1 → 0
+In stock problems, each decision (buy / sell / skip) affects future profit, not past profit.
+So the DP state naturally answers: “What is the best profit I can make starting from today?”
+
+Key rule to remember
+
+If DP means “up to i” → fill forward
+
+If DP means “from i onward” → fill backward
+
+This is a modeling choice, not a special rule for stocks.
