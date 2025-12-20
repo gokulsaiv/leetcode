@@ -1,0 +1,265 @@
+# SysDev-2 LLD Reference — Cache (LRU) Design & Change Detection Guide
+
+This document captures:
+- Final class design for an in-memory cache with LRU eviction
+- How to detect change points
+- How to justify abstractions using SOLID
+- How to defend design decisions in interviews
+
+---
+
+## 1. Final Class Design (LRU Cache)
+
+### 1. Cache<K, V> (Interface)
+**Responsibility**
+- Public contract for cache users
+- Stable API
+
+**Methods**
+- get(K key)
+- put(K key, V value)
+
+**Why it exists**
+- Clients should depend on a stable abstraction
+- Allows different cache implementations later
+
+**SOLID**
+- ISP: Clients only depend on what they use
+- DIP: High-level code depends on abstraction
+
+---
+
+### 2. InMemoryCache<K, V> (Concrete Class)
+**Responsibility**
+- Stores key → value
+- Enforces capacity
+- Coordinates eviction
+
+**Owns**
+- Map<K, V> storage
+- Capacity logic
+- Calls eviction policy
+
+**Does NOT own**
+- Eviction algorithm
+- Data-structure mechanics
+
+**Why**
+- Cache behavior (get/put/capacity) is stable
+- Eviction varies independently
+
+**SOLID**
+- SRP: One reason to change (cache behavior)
+- OCP: New eviction strategies do not modify this class
+- DIP: Depends on EvictionPolicy abstraction
+
+---
+
+### 3. EvictionPolicy<K> (Interface)
+**Responsibility**
+- Decide which key to evict
+- Track access patterns
+
+**Methods**
+- recordAccess(K key)
+- evictKey(): K
+
+**Does NOT**
+- Store values
+- Mutate cache
+- Know capacity
+
+**Why**
+- Eviction rules change independently of cache behavior
+
+**SOLID**
+- SRP: Only eviction decision logic
+- OCP: New policies added without modifying cache
+- ISP: Minimal, focused interface
+
+---
+
+### 4. LRUEvictionPolicy<K> (Concrete Class)
+**Responsibility**
+- Implement LRU eviction logic
+
+**Owns**
+- Doubly Linked List
+- Map<K, Node>
+- Node creation & pointer manipulation
+
+**Why**
+- LRU mechanics are complex and algorithm-specific
+- Must be hidden from rest of system
+
+**SOLID**
+- SRP: Only LRU mechanics change here
+- Encapsulation: Data structures are private
+
+---
+
+### 5. Node<K> (Internal Helper)
+**Responsibility**
+- Represent ordering metadata for eviction
+
+**Scope**
+- Private / package-private
+- Used only inside LRUEvictionPolicy
+
+**Why**
+- Not a variation point
+- No external consumers
+
+**IMPORTANT**
+- Do NOT make this an interface
+- Do NOT expose it
+
+---
+
+### 6. CacheFactory (Optional)
+**Responsibility**
+- Object creation & configuration
+- Inject eviction policy into cache
+
+**Why**
+- Avoids construction logic inside cache
+- Prevents OCP + SRP violations in Cache
+
+**When to introduce**
+- Multiple cache types or configurations exist
+
+**SOLID**
+- SRP: Creation separated from behavior
+- OCP: Cache not modified when new types added
+
+---
+
+## 2. How Classes Interact (Flow)
+
+### get(key)
+1. Cache checks storage
+2. If present → evictionPolicy.recordAccess(key)
+3. Return value
+
+### put(key, value)
+1. If capacity exceeded:
+   - ask evictionPolicy.evictKey()
+   - cache removes key from storage
+2. Insert value
+3. evictionPolicy.recordAccess(key)
+
+**Key rule**
+- Eviction policy decides
+- Cache executes
+
+---
+
+## 3. Questions to Detect Change (ASK BEFORE DESIGNING)
+
+Ask these silently before creating any class or interface.
+
+### Q1. Who uses this?
+- One client → low variability
+- Many clients → high variability
+
+---
+
+### Q2. Is this a business rule or a technical mechanism?
+- Business rule → likely to change → abstract
+- Mechanism → hide in concrete class
+
+---
+
+### Q3. Can two things change independently?
+If YES → separate them
+
+Example:
+- Cache API vs eviction logic → YES → separate
+
+---
+
+### Q4. What code do I NOT want to touch in production?
+That code must be stable and protected.
+
+---
+
+### Q5. If requirement X changes, how many files change?
+- One file → good
+- Many files → design smell
+
+---
+
+## 4. How to Defend a Design Decision (Interview Template)
+
+When introducing an abstraction:
+
+### 1. State the pressure
+“What is likely to change?”
+
+### 2. State SOLID violation avoided
+- OCP → modification required for extension
+- SRP → multiple reasons to change
+- ISP → fat interfaces
+- DIP → high-level depending on details
+
+### 3. State advantages
+- Localized change
+- Easier testing
+- Safer production changes
+
+### 4. State disadvantages (IMPORTANT)
+- More classes
+- Slight complexity
+- Not worth it if change never happens
+
+Interviewers reward this balance.
+
+---
+
+## 5. Example: Eviction Policy Justification
+
+**Why abstraction**
+- Eviction rules vary independently of cache behavior
+
+**SOLID**
+- OCP: New eviction without modifying cache
+- SRP: Cache not responsible for eviction logic
+
+**Advantage**
+- Safe extension (LRU → LFU)
+- Clean ownership boundaries
+
+**Disadvantage**
+- Extra abstraction
+- Overkill if eviction never changes
+
+---
+
+## 6. What NOT to Do (Common Interview Mistakes)
+
+- Do NOT expose node operations in interfaces
+- Do NOT merge eviction + cache + data structures
+- Do NOT abstract speculative helpers
+- Do NOT start with data structures
+- Do NOT name patterns first
+
+---
+
+## 7. One-Line Rules to Remember
+
+- Abstract behavior, not data structures
+- Reasons to change define boundaries
+- Configuration happens at creation
+- Mechanics live in concrete classes
+- Good design is defensible, not perfect
+
+---
+
+## 8. Final Mental Checklist Before You Speak
+
+Before adding any class/interface, ask:
+- What change does this isolate?
+- Which SOLID rule does this protect?
+- What disadvantage am I accepting?
+
+If you can answer those, your design is SysDev-2 ready.
