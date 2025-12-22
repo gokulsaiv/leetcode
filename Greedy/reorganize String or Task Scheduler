@@ -1,0 +1,45 @@
+class Reorganizer{
+    int fq;
+    int availableTime;
+    char ch;
+    Reorganizer(int fq,int availableTime,char ch){
+        this.fq = fq;
+        this.availableTime =availableTime;
+        this.ch = ch;
+    }
+}
+class Solution {
+    public String reorganizeString(String s) {
+        Map<Character,Reorganizer> map = new HashMap<>();
+        for(char str : s.toCharArray()){
+            if(map.containsKey(str)){
+                int freq = map.get(str).fq;
+                map.get(str).fq = freq+1;
+            }
+            else{
+                map.put(str,new Reorganizer(1,0,str));
+            }
+        }
+        PriorityQueue<Reorganizer> pq = new PriorityQueue<>((a,b)->{
+            return Integer.compare(b.fq,a.fq);
+        });
+        Queue<Reorganizer>q = new LinkedList<>();
+        for(Map.Entry<Character,Reorganizer> ele : map.entrySet()){
+            pq.offer(ele.getValue());
+        }
+        StringBuilder ans = new StringBuilder();
+        int i =0;
+        while(!pq.isEmpty() || !q.isEmpty()){
+            while(!q.isEmpty() && q.peek().availableTime < i)pq.offer(q.poll());
+            if(pq.isEmpty())break;
+            Reorganizer node = pq.poll();
+            ans.append(node.ch);
+            node.fq =  node.fq -1;
+            node.availableTime = i + 1;
+            if(node.fq > 0)q.offer(node);
+            i++;
+        }
+        // System.out.println(ans.toString());
+        return ans.toString().length() == s.length() ? ans.toString() : "";
+    }
+}
