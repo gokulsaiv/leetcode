@@ -1,0 +1,30 @@
+class Solution {
+    public void combinationGenerator(int i , String digits,List<String> ans , StringBuilder temp,Map<Character,String> map){
+        if(i == digits.length()){
+            ans.add(temp.toString());
+            return;
+        }
+        String s = map.get(digits.charAt(i));
+        for(int j = 0 ; j < s.length() ;j++){
+            temp.append(s.charAt(j));
+            combinationGenerator(i+1,digits,ans,temp,map);
+            temp.deleteCharAt(temp.length()-1);
+        }
+    }
+    public List<String> letterCombinations(String digits) {
+        Map<Character,String> map = new HashMap<>();
+        map.put('2' , "abc");
+        map.put('3' , "def");
+        map.put('4' , "ghi");
+        map.put('5' , "jkl");
+        map.put('6' , "mno");
+        map.put('7' , "pqrs");
+        map.put('8' , "tuv");
+        map.put('9' , "wxyz");
+        List<String> ans = new ArrayList<>();
+        StringBuilder temp = new StringBuilder();
+        combinationGenerator(0,digits,ans,temp,map);
+        return ans;
+        
+    }
+}
