@@ -1,0 +1,293 @@
+====================================================
+LOGGER SYSTEM — SYSDEV-2 LLD REVISION NOTES
+====================================================
+
+PURPOSE
+-------
+Design a logging library used by multiple backend services.
+Focus is on non-blocking behavior, high throughput, runtime
+configurability, and production awareness (SysDev-2 level).
+
+
+----------------------------------------------------
+1. CORE REQUIREMENTS
+----------------------------------------------------
+- Non-blocking for application threads
+- High throughput
+- Thread-safe
+- Runtime configurable
+- Extensible destinations
+- Best-effort logging (must NOT crash services)
+
+
+----------------------------------------------------
+2. INITIAL WRONG ASSUMPTIONS & CORRECTIONS
+----------------------------------------------------
+
+Mistake 1: Using Chain of Responsibility for log levels
+------------------------------------------------------
+Initial idea:
+INFO -> DEBUG -> ERROR -> CRITICAL (handler chain)
+
+Why wrong:
+- Log levels are filters, not handlers
+- ERROR logs do not "skip" INFO; they pass a threshold
+- O(n) handler walk instead of O(1) filter
+- Hard to change log level dynamically
+
+Correction:
+- Producer decides log level
+- Logger filters logs
+- No chain for log levels
+
+
+Mistake 2: Producer choosing log destination
+--------------------------------------------
+Initial idea:
+Message specifies DB / file / console
+
+Why wrong:
+- Tight coupling
+- Requires code changes for ops decisions
+- Breaks operational control
+- Dangerous in production
+
+Correction:
+- Producer only provides message + severity
+- Logger configuration decides destinations
+
+
+Mistake 3: Killing service when logger fails
+--------------------------------------------
+Initial idea:
+If logger fails, crash service / replica
+
+Why wrong:
+- Logging is non-critical
+- Availability > observability
+- Crashing service due to logging is a production anti-pattern
+
+Correction:
+- Logging is best-effort
+- Fail logging, not traffic
+- Emit metrics and degrade gracefully
+
+
+Mistake 4: Multiple queues per log level
+----------------------------------------
+Initial idea:
+Separate INFO, ERROR, DEBUG queues and workers
+
+Why wrong:
+- Memory fragmentation
+- Ordering loss
+- Too much complexity
+- No real benefit
+
+Correction:
+- Single bounded queue
+- Backpressure based on log level
+
+
+----------------------------------------------------
+3. FINAL CORRECT LOGGER DESIGN
+----------------------------------------------------
+
+COMPONENTS OVERVIEW
+-------------------
+
+1) LogMessage
+-------------
+Carries log data only.
+
+Fields:
+- messageId (for downstream dedup)
+- timestamp
+- logLevel (INFO, WARN, ERROR, etc.)
+- message
+- metadata (service, requestId, traceId)
+
+Must NOT contain:
+- destination info
+- handler choice
+- infrastructure details
+
+
+2) LogManager (Single Entry Point)
+----------------------------------
+Responsibilities:
+- Holds runtime configuration
+- Filters logs by level
+- Enqueues logs
+- Exposes log(LogMessage)
+
+Fast path:
+- If message.level < configured.level -> drop
+- Else enqueue
+- Return immediately
+
+Properties:
+- Non-blocking
+- O(1)
+- Thread-safe
+
+
+3) Runtime Configuration (Control Plane)
+----------------------------------------
+Configurable at runtime:
+- Log level
+- Enabled appenders
+- Sampling / drop policy
+
+Important rules:
+- NOT passed per message
+- NOT chosen by producer
+- Changeable without code changes
+
+Examples:
+- Config file reload
+- Admin API
+- Central config service
+
+
+4) Queue (In-Memory, Bounded)
+-----------------------------
+- Thread-safe concurrent queue
+- Prevents memory explosion
+- Decouples producers from IO
+
+
+5) Backpressure Policy
+----------------------
+When queue is full:
+
+DEBUG -> Drop
+INFO  -> Drop
+WARN  -> Best effort
+ERROR -> Never drop
+
+Expose metric:
+- dropped_log_count
+
+This is critical for SysDev-2 interviews.
+
+
+6) Worker Pool (Async Processing)
+---------------------------------
+- Multiple worker threads
+- Poll queue
+- Process logs independently
+- Thread crash != system failure
+- Threads are restarted
+
+Failure is contained at thread level.
+
+
+7) Appenders (Correct Abstraction)
+----------------------------------
+Appender:
+- Defines HOW and WHERE logs are written
+- Chosen by configuration, not producer
+
+Examples:
+- ConsoleAppender
+- FileAppender
+- RemoteAppender
+
+Worker forwards each log to ALL active appenders.
+Appender failures are isolated.
+
+
+----------------------------------------------------
+4. CORRECT USE OF DESIGN PATTERNS
+----------------------------------------------------
+
+- Chain / Strategy is NOT for log levels
+- Chain / Strategy IS correct for appenders
+
+Example:
+Worker
+ -> ConsoleAppender.append()
+ -> FileAppender.append()
+ -> RemoteAppender.append()
+
+
+----------------------------------------------------
+5. CONCURRENCY & FAILURE HANDLING
+----------------------------------------------------
+
+Concurrency:
+- Use concurrent queue abstraction
+- Do not implement locking manually
+- Avoid duplicate processing
+
+Failure handling:
+- Worker crash -> restart worker
+- Appender failure -> retry / disable appender
+- Queue full -> drop lower-priority logs
+- Process crash -> logs in memory may be lost (acceptable)
+
+
+----------------------------------------------------
+6. IDEMPOTENCY
+----------------------------------------------------
+
+messageId exists for:
+- Downstream deduplication
+- Retry safety
+- Avoid double ingestion
+
+Idempotency is NOT enforced in LogManager.
+It is enforced downstream if needed.
+
+
+----------------------------------------------------
+7. METRICS & OBSERVABILITY
+----------------------------------------------------
+
+Expose:
+- Queue size
+- Dropped logs count
+- Appender latency
+- Appender error rate
+
+Shows production readiness.
+
+
+----------------------------------------------------
+8. PRODUCTION EVOLUTION (MENTION, DON’T LEAD)
+----------------------------------------------------
+
+Correct phrasing:
+"At LLD level this is in-memory. In production, the queue
+can be backed by disk or Kafka."
+
+Never start design with Kafka.
+
+
+----------------------------------------------------
+9. ONE-PARAGRAPH INTERVIEW SUMMARY
+----------------------------------------------------
+
+"The logger exposes a non-blocking API that filters messages
+based on runtime configuration and enqueues them into a bounded,
+thread-safe queue. A pool of worker threads asynchronously
+processes logs and forwards them to configurable appenders.
+Backpressure is handled by dropping lower-priority logs while
+preserving ERROR logs. Logging failures never impact service
+availability, and configuration is dynamically adjustable
+at runtime without code changes."
+
+
+----------------------------------------------------
+10. KEY SYSDEV-2 TAKEAWAYS
+----------------------------------------------------
+- Log levels are filters, not handlers
+- Producers never choose destinations
+- Logging is best-effort
+- Failure is contained at smallest unit
+- Operational control > code changes
+
+====================================================
+END
+====================================================
