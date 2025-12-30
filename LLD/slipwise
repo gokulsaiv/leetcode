@@ -1,0 +1,135 @@
+Splitwise System Design – README
+
+Overview
+--------
+This document outlines the low-level design of a Splitwise-like expense sharing application.
+The design includes the main classes, their responsibilities, and how they interact.
+
+Main Classes and Components
+---------------------------
+
+1. User
+   - Attributes:
+     - id
+     - name
+     - phoneNumber
+     - email
+   - Represents an individual user who can join groups and add expenses.
+
+2. Group
+   - Attributes:
+     - id
+     - name
+     - creationDate
+     - users (list of User)
+     - expenses (list of Expense)
+     - balanceSheet (BalanceSheet)
+     - splitStrategy (SplitStrategy)
+   - Responsibilities:
+     - Manages a collection of users and their shared expenses.
+     - Contains a balance sheet to track who owes whom within the group.
+     - Holds a split strategy to determine how expenses are divided.
+
+3. Expense
+   - Attributes:
+     - id
+     - name
+     - amount
+     - date
+     - paidBy (User)
+   - Represents a single expense added to the group, including who paid and the total amount.
+
+4. BalanceSheet
+   - Attributes:
+     - Map<User, Map<User, Amount>>
+       (Outer user → inner map of other users and the net amount owed)
+   - Responsibilities:
+     - Tracks who owes how much to whom inside a group.
+     - Positive amount means others owe this user.
+     - Negative amount means this user owes others.
+     - Maintains running totals of debts and credits.
+
+5. SplitStrategy (Interface)
+   - Purpose:
+     - Defines how an expense is split among users.
+   - Examples:
+     - EqualSplitStrategy
+     - PercentageSplitStrategy
+   - Each implementation contains only split calculation logic.
+
+6. SplitStrategyMaker
+   - A factory class that returns the appropriate SplitStrategy
+     based on the group’s chosen split type.
+   - Keeps Group logic clean and extensible.
+
+Core Flows and Interactions
+---------------------------
+
+1. Creating a Group
+   - A user creates a group.
+   - Group is initialized with:
+     - users list
+     - empty expenses list
+     - empty BalanceSheet
+     - chosen SplitStrategy (via SplitStrategyMaker).
+
+2. Adding an Expense
+   - User adds an expense to a group.
+   - Steps:
+     - Expense is stored in the group.
+     - SplitStrategy calculates per-user share.
+     - BalanceSheet is updated:
+       - Payer gets positive credit.
+       - Other members get negative balances.
+   - Time complexity: O(n), where n = number of group members.
+
+3. Viewing Dashboard
+   - Each user sees:
+     - Who they owe (negative balance).
+     - Who owes them (positive balance).
+   - No actual money transfer happens in the system.
+
+4. Editing or Deleting an Expense
+   - Reverse the original balance impact.
+   - Reapply the updated expense.
+   - BalanceSheet remains the single source of truth.
+
+5. User Leaving a Group
+   - Ideally discouraged mid-group.
+   - If allowed:
+     - Track which expenses were added by which user.
+     - Rebalance remaining expenses among active members.
+     - BalanceSheet is recalculated accordingly.
+
+Edge Cases and Scalability
+--------------------------
+
+- Performance:
+  - Expense update is O(n).
+  - This is optimal and expected since all group members are affected.
+
+- Large Groups:
+  - BalanceSheet avoids recalculating everything repeatedly.
+  - Only incremental updates are applied.
+
+- No Payment System:
+  - This is strictly an expense tracking system.
+  - Settlements are recorded manually.
+
+Future Extensions
+-----------------
+
+- Add new SplitStrategies without touching Group logic.
+- Add debt simplification logic to minimize transactions.
+- Introduce concurrency handling for simultaneous expense additions.
+- Persist data using database-backed repositories.
+
+Interview Notes (Amazon)
+------------------------
+- Clear separation of responsibilities.
+- Strategy pattern used correctly.
+- Time complexity justified.
+- Edge cases acknowledged.
+- Scope controlled (payments out of scope).
+
+End of Document
