@@ -1,0 +1,353 @@
+=====================================================
+Car Rental System – Low Level Design (LLD)
+Amazon SDE-2 Interview Oriented
+=====================================================
+
+1. PROBLEM OVERVIEW
+------------------
+Design a Car Rental System that allows users to search, reserve, pick up,
+and return cars across multiple cities and locations. The system must
+prevent double booking, support extensible pricing strategies, and handle
+concurrency correctly.
+
+Scope:
+- Multiple cities
+- Multiple locations per city
+- Each location owns its fleet of vehicles
+- Cars are picked up and returned at the same location
+- Only car rentals (future extensible to other vehicle types)
+
+Out of Scope:
+- Authentication / Authorization
+- External payment gateway
+- UI / APIs
+- Cross-location drop-offs
+- GPS tracking
+
+-----------------------------------------------------
+
+2. CORE ENTITIES & ENUMS
+-----------------------
+
+Enum: VehicleStatus
+-------------------
+AVAILABLE
+RESERVED
+RENTED
+MAINTENANCE
+
+Enum: ReservationStatus
+-----------------------
+CREATED
+CONFIRMED
+CANCELLED
+COMPLETED
+
+Enum: VehicleType
+-----------------
+SEDAN
+SUV
+HATCHBACK
+LUXURY
+
+-----------------------------------------------------
+
+3. USER
+-------
+
+Class: User
+-----------
+Attributes:
+- userId
+- name
+- phoneNumber
+- email
+
+Responsibilities:
+- Acts as a customer entity
+- Associated with reservations
+- No business logic inside User (data holder only)
+
+-----------------------------------------------------
+
+4. CITY & LOCATION
+------------------
+
+Class: City
+-----------
+Attributes:
+- cityId
+- cityName
+- Map<LocationId, Location>
+
+Responsibilities:
+- Acts as a logical grouping for locations
+- Routes requests to correct Location
+
+-----------------------------------------------------
+
+Class: Location
+---------------
+Attributes:
+- locationId
+- address
+- cityId
+- Map<VehicleId, Vehicle>
+- LocationManager locationManager
+
+Responsibilities:
+- Owns a fleet of vehicles
+- Delegates operations to LocationManager
+
+-----------------------------------------------------
+
+5. VEHICLE ABSTRACTION
+---------------------
+
+Interface: Vehicle
+------------------
+Attributes:
+- vehicleId
+- brand
+- model
+- fuelType
+- transmissionType
+- VehicleType
+- VehicleStatus
+- PricingStrategy pricingStrategy
+
+Methods:
+- getVehicleId()
+- getVehicleType()
+- getStatus()
+- setStatus(VehicleStatus status)
+- calculatePrice(startTime, endTime)
+
+Concrete Implementations:
+- Sedan
+- SUV
+- Hatchback
+- LuxuryCar
+
+Notes:
+- Pricing is NOT hardcoded inside vehicle
+- Vehicle delegates price calculation to PricingStrategy
+
+-----------------------------------------------------
+
+6. PRICING STRATEGY
+------------------
+
+Interface: PricingStrategy
+--------------------------
+Method:
+- calculatePrice(startTime, endTime)
+
+Concrete Implementations:
+- HourlyPricingStrategy
+- DailyPricingStrategy
+- Future: SurgePricingStrategy, DiscountPricingStrategy
+
+Design Choice:
+- Strategy Pattern
+- Allows pricing changes without modifying Vehicle or Reservation code
+
+-----------------------------------------------------
+
+7. RESERVATION
+--------------
+
+Class: Reservation
+------------------
+Attributes:
+- reservationId
+- User user
+- Vehicle vehicle
+- locationId
+- startTime
+- endTime
+- ReservationStatus status
+- Payment payment
+
+Methods:
+- confirmReservation()
+- cancelReservation()
+- completeReservation()
+
+Rules:
+- Reservation blocks vehicle for a given time window
+- Cancellation allowed only before rental start time
+- Once confirmed, vehicle cannot be reserved by others
+
+-----------------------------------------------------
+
+8. PAYMENT
+----------
+
+Class: Payment
+--------------
+Attributes:
+- paymentId
+- reservationId
+- amount
+- paymentTime
+- paymentStatus
+
+Notes:
+- Assume payment always succeeds
+- Stored for audit and reference
+- No gateway logic required
+
+-----------------------------------------------------
+
+9. SEARCH & AVAILABILITY
+-----------------------
+
+Search Inputs:
+- City
+- Location
+- VehicleType
+- Optional filters:
+  - brand
+  - transmission
+  - fuelType
+
+Data Structures (Discussed Options):
+
+Option 1: Simple List
+- List<Vehicle>
+- Linear scan (O(n))
+- Acceptable for small fleets
+
+Option 2: Nested Map (Preferred for optimization)
+- Map<Brand, Map<Model, Map<Transmission, Map<FuelType, Set<Vehicle>>>>>
+- Lookup time proportional to depth (treated as near-constant)
+- Improves search performance
+
+Availability Rules:
+- Vehicle must be AVAILABLE
+- Vehicle must not be reserved in overlapping time window
+
+-----------------------------------------------------
+
+10. LOCATION MANAGER (CORE LOGIC)
+--------------------------------
+
+Class: LocationManager
+----------------------
+Attributes:
+- locationId
+- Map<VehicleId, Vehicle>
+- Locking mechanism (conceptual)
+
+Methods:
+- searchVehicles(filters, timeWindow)
+- reserveVehicle(user, vehicleId, startTime, endTime)
+- cancelReservation(reservationId)
+- pickupVehicle(reservationId)
+- returnVehicle(reservationId)
+
+Responsibilities:
+- Core orchestration class
+- Handles reservation lifecycle
+- Ensures no double booking
+- Updates vehicle status correctly
+
+-----------------------------------------------------
+
+11. RESERVATION FLOW
+-------------------
+
+Reserve Vehicle:
+1. User selects city → location → vehicle
+2. LocationManager checks availability
+3. Lock is acquired (optimistic or pessimistic)
+4. Vehicle status updated to RESERVED
+5. Reservation object created
+6. Payment recorded
+7. Reservation confirmed
+
+Pickup Vehicle:
+1. Reservation validated
+2. Reservation status → CONFIRMED
+3. Vehicle status → RENTED
+
+Return Vehicle:
+1. Reservation closed
+2. Reservation status → COMPLETED
+3. Vehicle status → AVAILABLE
+4. Vehicle added back to available pool
+
+-----------------------------------------------------
+
+12. CONCURRENCY HANDLING
+-----------------------
+
+Discussed Strategies:
+
+Pessimistic Locking:
+- Lock vehicle or reservation record
+- Strong consistency
+- Lower concurrency
+- Simple mental model
+
+Optimistic Locking:
+- Versioning / retry on conflict
+- Higher concurrency
+- Requires conflict handling
+
+Interview Position:
+- Choose based on business priority
+- Strong consistency preferred to avoid double booking
+
+-----------------------------------------------------
+
+13. DESIGN PRINCIPLES FOLLOWED
+-----------------------------
+
+- Single Responsibility Principle
+- Open/Closed Principle
+- Strategy Pattern for Pricing
+- Composition over Inheritance
+- Separation of concerns
+- No God classes
+
+-----------------------------------------------------
+
+14. EXTENSIBILITY
+-----------------
+
+Future Additions Supported:
+- New vehicle types
+- New pricing rules
+- Surge pricing
+- Discounts
+- Different cancellation policies
+
+-----------------------------------------------------
+
+15. TIME COMPLEXITY DISCUSSION
+-----------------------------
+
+Search:
+- Linear scan: O(n)
+- Nested map lookup: near O(1)
+
+Reservation:
+- Direct vehicle reference
+- No traversal during reserve/return
+- Efficient state transitions
+
+-----------------------------------------------------
+
+16. INTERVIEW NOTES
+------------------
+
+- Design completed in ~35–40 minutes
+- Focus on clarity over over-engineering
+- Algorithms discussed only when pushed
+- Strong emphasis on trade-offs and reasoning
+
+=====================================================
+END OF DOCUMENT
+=====================================================
