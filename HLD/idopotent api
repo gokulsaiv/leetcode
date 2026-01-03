@@ -124,3 +124,66 @@ status	String	IN_PROGRESS, COMPLETED, FAILED.
 response_body	JSON	Cached response to return for duplicates.
 expiration_time	Timestamp	TTL for auto-deletion.
 user_id	String	For sharding/partitioning if necessary.
+
+REQUEST WORK FLOW
+=================
+Client
+  |
+  |  POST /orders
+  |  Idempotency-Key: UUID-123
+  v
+API Server
+  |
+  |-- Validate Idempotency-Key
+  |     |
+  |     |-- Missing → 400 Bad Request
+  |
+  |-- Check Idempotency Store
+        |
+        |-- Key NOT FOUND
+        |     |
+        |     |-- Acquire Lock / Atomic Create
+        |     |-- Save key with status = IN_PROGRESS
+        |     |
+        |     |-- Execute Business Logic
+        |           |
+        |           |-- SUCCESS
+        |           |     |
+        |           |     |-- Update status = COMPLETED
+        |           |     |-- Store response payload
+        |           |     |-- Return 201 Created
+        |           |
+        |           |-- FAILURE
+        |                 |
+        |                 |-- Mark status = FAILED or delete key
+        |                 |-- Return 5xx / error
+        |
+        |-- Key FOUND
+              |
+              |-- status = COMPLETED
+              |     |
+              |     |-- Return cached response (200/201)
+              |
+              |-- status = IN_PROGRESS
+              |     |
+              |     |-- Return 409 Conflict
+              |
+              |-- status = FAILED
+                    |
+                    |-- Allow retry (treat as new execution)
+
+
+RETRY FLOW
+==========
+
+Client receives:
+  |
+  |-- 201 / 200 → Done
+  |
+  |-- 409 Conflict
+        |
+        |-- Wait (Exponential Backoff + Jitter)
+        |-- Retry with SAME Idempotency-Key
+
+
+
