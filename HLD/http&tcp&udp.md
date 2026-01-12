@@ -4,6 +4,51 @@ This document explains how HTTP works over TCP, including connection setup, sequ
 The depth is intentionally tuned for SDE-2 / SysDev-2 interviews.
 
 ---
+# Application Layer vs Transport Layer (HTTP Focus) — SDE-2 Notes
+
+---
+
+## Big Picture
+
+Application Layer and Transport Layer solve **different problems**.
+
+- **Application Layer** → *What is being said?*  
+- **Transport Layer (Layer 4)** → *How is it delivered?*
+
+This separation is intentional and fundamental to networking.
+
+---
+
+## Application Layer Protocol (Layer 7)
+
+### What the Application Layer Does
+
+The application layer defines:
+
+- Message format
+- Request / response semantics
+- Commands and their meanings
+- Application-level behavior
+
+It answers the question:
+
+> **“What does this data mean to the application?”**
+
+---
+
+### Examples of Application Layer Protocols
+
+- HTTP / HTTPS
+- DNS
+- FTP
+- SMTP
+- Kafka protocol (Kafka has its own application-layer protocol)
+
+---
+
+### HTTP Example
+
+
 
 ## 1. Protocol Stack Overview
 
@@ -248,3 +293,6 @@ NOT expected:
 "HTTP relies on TCP for reliable, ordered delivery. TCP uses sequence numbers, acknowledgements, retransmissions, flow control, and congestion control to guarantee correctness. HTTP itself is unaware of packet loss. UDP trades reliability for lower latency, which is why it is used in real-time systems."
 
 This level of understanding is sufficient and correct for SDE-2 interviews.
+
+
+
