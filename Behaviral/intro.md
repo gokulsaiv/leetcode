@@ -12,4 +12,4 @@ Beyond core development, I’m very interested in system reliability and observa
 Outside of engineering, I am a three-time National Swimming Champion. Competitive sports taught me the discipline and methodical execution needed to stay calm under pressure—traits that I find incredibly useful during incident response and complex system design discussions.  
 +1  
 
-I’m looking to transition into a role where I can apply my experience in distributed systems and operational scaling to solve large-scale reliability challenges.
+I’m looking to transition into a System Development role where I can contribute to production stability by debugging and fixing live issues, building proactive monitoring and automation, and improving the reliability of large-scale distributed systems.
