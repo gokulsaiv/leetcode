@@ -48,3 +48,65 @@ This prevented the 'Phantom IP' issue where a controller restarts and hands out 
 **The Tech:** "In the distributed model, every DPU node had to 'watch' the global state to avoid collisions. If we had 1,000 nodes, we had 1,000 watchers each trying to track 1,000 IPs. That created a massive fan-out of API requests.
 
 By centralizing, I removed the need for nodes to be aware of each other. The Controller holds the global map in memory. The nodes just wait for instructions. This reduced the complexity to O(N) because adding a new node only adds ONE new connection to the system, rather than forcing every existing node to update its watch list."
+
+
+---
+
+## Part 3: Deep Dive - Concurrency & Locking Strategy
+*Use this section if the interviewer drills down into system design, threading, or race conditions. This is your "Dive Deep" moment.*
+
+### The Opening Script (How to start the answer)
+**Step 1: Validate the Complexity**
+"That is a great question. Concurrency management was actually the most critical part of this design because we needed high throughput without risking race conditions."
+
+**Step 2: The Headline Answer**
+"To handle this, I designed the controller as a **Multi-Threaded System** using the standard **Producer-Consumer pattern**, guarded by a **Granular Mutex**."
+
+**Step 3: The Explanation**
+"I had multiple worker threads processing requests in parallel. They all accessed the shared 'IP Bitmap,' but I protected that map using a mutex. Crucially, I used a **Granular Locking** strategy: I only held the lock for the nanoseconds required to flip the bit in memory. I performed all heavy network I/O *outside* the lock to prevent blocking."
+
+### The Technical Implementation (Granular Locking)
+
+**The Core Concept:**
+If you lock the entire function, the system effectively becomes single-threaded (slow). By locking *only* the critical section (memory access), you allow multiple threads to wait on network calls simultaneously (fast).
+
+**Pseudo-Code Logic:**
+
+```go
+type IPAllocator struct {
+    ipMap  map[string]bool  // Shared Resource (Not Thread Safe)
+    mu     sync.Mutex       // The Guard
+}
+
+// This runs in multiple threads (Workers)
+func (c *IPAllocator) Reconcile(cr *CustomResource) {
+    
+    // --- START CRITICAL SECTION (Fast) ---
+    // 1. Acquire Lock
+    c.mu.Lock()
+    
+    // 2. Idempotency Check: Did we already handle this?
+    if c.checkIfAllocated(cr.Name) {
+        c.mu.Unlock()
+        return // Early Exit
+    }
+
+    // 3. In-Memory Allocation: Flip the bit
+    newIP := c.findNextFreeIP()
+    c.ipMap[newIP] = true
+    
+    // 4. Release Lock Immediately
+    c.mu.Unlock() 
+    // --- END CRITICAL SECTION ---
+
+
+    // --- START I/O SECTION (Slow) ---
+    // 5. Network Call happens OUTSIDE the lock
+    // This allows other threads to enter the Critical Section while we wait.
+    err := k8sClient.UpdateStatus(cr, newIP)
+    
+    if err != nil {
+        // Rollback logic if network fails
+        c.releaseIP(newIP) 
+    }
+}
