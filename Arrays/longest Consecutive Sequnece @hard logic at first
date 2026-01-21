@@ -1,0 +1,33 @@
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        if (nums.length == 0) return 0;
+
+        // Use a map just like you did (value is irrelevant)
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.putIfAbsent(num, 0); // just track existence
+        }
+
+        int max = 0;
+
+        // Loop through all numbers
+        for (int num : nums) {
+            // Only start a sequence if num-1 does NOT exist
+            if (!map.containsKey(num - 1) && map.get(num) == 0) {
+                int currentNum = num;
+                int length = 1;
+                map.put(num,1);
+
+                // Expand forward until the sequence ends
+                while (map.containsKey(currentNum + 1)) {
+                    currentNum++;
+                    length++;
+                }
+
+                max = Math.max(max, length); // update max
+            }
+        }
+
+        return max;
+    }
+}
