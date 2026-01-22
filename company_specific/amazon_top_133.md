@@ -130,7 +130,7 @@
 | 1235 | Maximum Profit in Job Scheduling | Hard | Array, Binary Search, DP, Sorting | 3 | 0.39% | 67.30% |
 | 100 | Same Tree | Easy | Tree, DFS, BFS, Binary Tree | 3 | 0.39% | 67.69% |
 | 37 | Sudoku Solver | Hard | Array, Backtracking, Matrix | 3 | 0.39% | 68.08% |
-| 74 | Search a 2D Matrix | Medium | Array, Binary Search, Matrix | 3 | 0.39% | 68.47% |
+| 74 | Search a 2D Matrix | Medium | Array, Binary Search, Matrix | 3 | 0.39% | 68.47% | *
 | 455 | Assign Cookies | Easy | Array, Greedy, Sorting | 3 | 0.39% | 68.86% |
 | 662 | Maximum Width of Binary Tree | Medium | Tree, BFS, DFS, Binary Tree | 3 | 0.39% | 69.25% |
 | 392 | Is Subsequence | Easy | Two Pointers, String, DP | 3 | 0.39% | 69.64% |
