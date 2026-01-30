@@ -6,84 +6,187 @@ If you can defend against most of these, you are thinking at the right depth.
 
 ---
 
-## 1. Hot Keys & Skew
+## 1. Hot Keys & Skew (Read vs Write – Deep Dive)
 
-### Problem
+Hot keys are *not one problem*. Read hot keys and write hot keys break systems in very different ways.
 
-A small subset of keys receives a disproportionate amount of reads or writes.
-Examples: celebrity user, popular product, global counter, feature flag.
+### 1A. Read Hot Keys
 
-### Failure Modes
+#### What Exactly Breaks
 
-* Single shard CPU saturation
-* Lock contention
-* Tail latency explosion
-* Replica lag amplification
+* CPU saturation on a single shard or replica
+* Cache miss amplification (many identical misses)
+* Tail latency (P99 explodes, P50 looks fine)
 
-### Interview Pushbacks
+#### Concrete Scenario
 
-* Why does consistent hashing not save you here?
-* What happens if the hot key is 1% of keys but 90% of traffic?
-* What breaks first: CPU, lock manager, or network?
+* User profile of a celebrity
+* Feature flag read on every request
+* Product detail page during flash sale
 
-### Mitigations
+#### Interview Pushback You’ll Get
 
-* Key sharding (logical fan-out)
-* Write-behind aggregation
-* Probabilistic counters (HyperLogLog, sketches)
-* Cache with request coalescing
+* Why can’t replicas save you?
+* Why does caching *still* fail here?
+* What happens when the cache entry expires?
+
+#### Correct Solutions (Pick Based on Guarantees)
+
+1. **Cache + Request Coalescing (Primary Fix)**
+
+   * Only one request recomputes the value
+   * Others wait or get stale data
+   * Redis mutex / single-flight pattern
+
+2. **TTL Jitter (Secondary Fix)**
+
+   * Avoid synchronized expiration
+   * Randomize TTL by ±10–20%
+
+3. **Read Fanout via Local Caches**
+
+   * Per-node in-memory cache
+   * Reduces network hops
+
+4. **Stale-While-Revalidate**
+
+   * Serve stale data
+   * Refresh asynchronously
+
+#### What You Explicitly Accept
+
+* Slight staleness
+* Temporary inconsistency
 
 ---
 
-## 2. Read-Write Amplification
+### 1B. Write Hot Keys
 
-### Problem
+#### What Exactly Breaks
 
-A single logical operation fans out into many physical IOs.
+* Lock contention
+* Leader CPU saturation
+* WAL serialization bottleneck
+* Replica lag grows unbounded
 
-### Failure Modes
+#### Concrete Scenario
+
+* Global like counter
+* Inventory count
+* Rate-limit counters
+
+#### Interview Pushback You’ll Get
+
+* Why not shard the key?
+* Why do locks become the bottleneck?
+* What happens to ordering guarantees?
+
+#### Correct Solutions (Very Different from Reads)
+
+1. **Logical Key Sharding (Primary Fix)**
+
+   * Split key into N sub-keys
+   * Aggregate asynchronously
+   * Example: counter:post_id:shard_i
+
+2. **Append-Only Writes**
+
+   * No in-place updates
+   * Downstream aggregation job
+
+3. **Write Buffers / Write-Behind**
+
+   * Buffer writes in memory
+   * Flush periodically
+
+4. **Probabilistic Data Structures**
+
+   * HyperLogLog
+   * Count-Min Sketch
+
+#### What You Explicitly Accept
+
+* Eventual correctness
+* Approximate values
+
+---
+
+## 2. Read vs Write Amplification (Concrete Numbers)
+
+### Read Amplification
+
+#### What It Means
+
+One logical read causes many disk reads.
+
+#### Where It Happens
+
+* LSM trees
+* Secondary indexes
+* Wide rows
+
+#### Failure
 
 * Disk IO saturation
-* Compaction storms
-* Cache eviction of useful data
+* Cache pollution
 
-### Interview Pushbacks
+#### Mitigations
 
-* How many disk writes does one logical write generate?
-* What happens during compaction + peak traffic?
-* Can your SLA survive worst-case amplification?
-
-### Mitigations
-
-* LSM tuning (memtable size, compaction strategy)
-* Batch writes
-* Column-family separation
+* Bloom filters
+* Block cache sizing
+* Index-only reads
 
 ---
 
-## 3. Write Contention & Locks
+### Write Amplification
 
-### Problem
+#### What It Means
 
-Multiple writers compete for the same rows / ranges.
+One logical write produces many disk writes.
 
-### Failure Modes
+#### Where It Happens
 
-* Lock queues
-* Deadlocks
-* Priority inversion
+* WAL + memtable + compaction
 
-### Interview Pushbacks
+#### Failure
 
-* Are locks pessimistic or optimistic?
-* How do retries affect tail latency?
-* Can two transactions starve each other?
+* Disk wear
+* Latency spikes during compaction
 
-### Mitigations
+#### Mitigations
 
-* Optimistic concurrency control
-* Versioned writes
-* Append-only models
+* Larger memtables
+* Tiered compaction
+* Batched writes
+
+---
+
+## 3. Write Contention & Locks (Precise Failure Paths)
+
+### Where Contention Comes From
+
+* Row-level locks
+* Range locks
+* Metadata locks
+
+### Failure Sequence
+
+Writer A locks → Writer B waits → retries → retry storm → leader collapse
+
+### Solutions
+
+1. Optimistic Concurrency Control
+
+   * Version checks
+   * Retry on conflict
+
+2. Append-Only Models
+
+   * No overwrite
+
+3. Partition-Aware Writes
+
+   * Route writes by key range
 
 ---
 
