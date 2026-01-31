@@ -1,277 +1,368 @@
-# Amazon L5 System Design – Complete Mental Model (HLD)
+# Amazon L5 HLD – Advanced Runtime & Failure Thinking
 
-This document is a **thinking framework**, not a list of patterns.
-It is designed to help you **reason clearly under pressure** during an Amazon L5 (SDE II) High-Level Design interview.
+This document focuses ONLY on the parts of system design that typically
+decide an Amazon L5 (SDE II) HLD interview.
 
-The goal is not to “use all patterns”, but to **make deliberate choices**, explain trade-offs, and defend them calmly.
+It assumes you already know:
+- Databases and access patterns
+- Caching basics
+- Load balancing
+- Rate limiting
+- Back-of-the-envelope estimation
 
-This file covers **9 core topics** that together allow you to answer *almost any* HLD question.
-
----
-
-## 1. Identify the User and the Critical Path
-
-### What this means
-Before designing anything, you must understand:
-- **Who is using the system**
-- **What action actually matters**
-
-Not all users and actions are equally important.
-
-### Examples
-- In an e-commerce system:
-  - Browsing is important
-  - Checkout is **critical**
-- In a ride-hailing system:
-  - Driver matching is critical
-  - Analytics dashboards are not
-
-### Why interviewers care
-They want to see that you:
-- Protect the most important flows
-- Are willing to degrade less important features
-
-### Good interview signal
-> “I’ll first identify the revenue-critical or user-critical path and make sure that path stays available even during failures.”
+This file is about **what happens when the system is under stress**.
 
 ---
 
-## 2. Estimate Scale (Back-of-the-Envelope)
+## 5. Backpressure (The Difference Between Survival and Collapse)
 
-### What this means
-You need **rough numbers**, not perfect math.
+### What Backpressure Really Means
 
-You should estimate:
-- Requests per second (QPS)
-- Read vs write ratio
-- Data growth over time
-- Memory vs disk usage
-
-### Simple example
-- 10 million users
-- 10% active daily → 1 million DAU
-- Each user does ~10 actions/day
-- Peak traffic = ~5× average
-
-This helps you decide:
-- Cache or not
-- SQL or NoSQL
-- Single region or multi-region
-
-### Why interviewers care
-Designs without scale assumptions are **not real designs**.
-
-### Good interview signal
-> “At this scale, a single database node will not be enough, so we need partitioning.”
-
----
-
-## 3. Choose Data Stores Based on Access Patterns
-
-### What this means
-You do **not** choose databases by popularity.
-You choose them by:
-- Read-heavy vs write-heavy
-- Range queries vs key lookups
-- Strong vs eventual consistency
-
-### Examples
-- User profile lookup → Key-value store
-- Orders with date filters → B+ Tree based database
-- Event logs → LSM-based store
-
-### Important idea
-Each database choice is a **trade-off**, not a “best” solution.
-
-### Good interview signal
-> “I’m choosing this database because it optimizes our dominant access pattern, and I accept these trade-offs.”
-
----
-
-## 4. Caching Strategy (What, Where, and Why)
-
-### What caching is
-Caching stores frequently accessed data closer to the user or service to:
-- Reduce latency
-- Reduce database load
-
-### What to cache
-- Read-heavy data
-- Data that does not change frequently
-- Expensive computations
-
-### Where to cache
-- Client-side (browser / app)
-- CDN (static or semi-static content)
-- Service-level cache (Redis / Memcached)
-
-### Cache challenges
-- Cache invalidation
-- Stale data
-- Cache stampede
-
-### Good interview signal
-> “I’m caching this data because it is read-heavy and tolerates slight staleness.”
-
----
-
-## 5. Backpressure (Preventing System Collapse)
-
-### What backpressure is
-Backpressure is the system’s ability to **slow down or reject work** when it is overloaded.
+Backpressure is the system’s ability to **say NO** when it cannot safely
+process more work.
 
 Without backpressure:
-- Queues grow infinitely
-- Memory explodes
-- Latency becomes unbounded
-- The system crashes
+- Requests keep coming in
+- Queues keep growing
+- Latency explodes
+- Memory fills up
+- Eventually, everything crashes
 
-### Where backpressure is applied
-
-#### Client-side
-- Return HTTP 429
-- Client retries with exponential backoff
-
-#### Gateway / Load Balancer
-- Rate limiting
-- Per-user quotas
-
-#### Service-level
-- Bounded queues
-- Thread pool limits
-- Fail fast when saturated
-
-### Important warning
-Retries without limits can **make outages worse**.
-
-### Good interview signal
-> “I prefer failing fast early rather than letting retries amplify load.”
+Backpressure is not an optimization.
+It is a **safety mechanism**.
 
 ---
 
-## 6. Failure Modes (What Breaks First)
+### Why Backpressure Matters at Amazon Scale
 
-### What this means
-Every system will fail.
-The question is **how** and **where**.
+At high scale, failures are rarely binary.
+More often:
+- A downstream service becomes slow (not dead)
+- Retries increase traffic
+- Queues silently grow
+- Latency spikes propagate upstream
 
-### Common failures
+This is how **cascading failures** happen.
+
+Backpressure stops the cascade early.
+
+---
+
+### Where Backpressure Must Exist (Very Important)
+
+#### 1. At the Edge (Client / Gateway)
+
+- Return HTTP `429 Too Many Requests`
+- Tell the client to slow down
+- Client retries with **exponential backoff + jitter**
+
+Why this is powerful:
+- Cheapest place to reject traffic
+- Protects the entire backend
+
+Interview-ready line:
+> “I prefer rejecting traffic early at the edge rather than letting retries amplify load deeper in the system.”
+
+---
+
+#### 2. At the Service Level
+
+Key rules:
+- **Never use unbounded queues**
+- **Never allow infinite request buffering**
+
+Common techniques:
+- Fixed-size thread pools
+- Bounded request queues
+- Fail fast when capacity is reached
+
+If a service is overloaded, rejecting requests is healthier than accepting them.
+
+---
+
+#### 3. Between Services (Downstream-Aware Backpressure)
+
+When Service A calls Service B:
+- If B becomes slow → A must stop sending traffic
+- Circuit breaker opens
+- A switches to degraded behavior
+
+This prevents:
+- Thread exhaustion
+- Retry storms
+- Full system collapse
+
+---
+
+### Dangerous Anti-Patterns (Say This Explicitly)
+
+- Blind retries without limits
+- Infinite queues
+- “Auto-scaling will fix it” (it won’t, under cascading failure)
+
+Interview-safe line:
+> “Auto-scaling helps with sustained load, not with sudden dependency failures.”
+
+---
+
+## 6. Failure Modes (What Breaks First and Why)
+
+### What Interviewers Are Looking For
+
+They want to see that you:
+- Expect failures
+- Think about partial failures
+- Understand how failures spread
+
+They are NOT looking for perfection.
+
+---
+
+### Common Real-World Failure Modes
+
+#### 1. Slow Dependencies (Most Common)
+
 - Database latency spikes
-- Partial network failures
-- Dependency timeouts
-- Node crashes
+- Cache misses increase
+- Network jitter
 
-### What interviewers expect
-You to describe:
-- At least 2 realistic failures
-- What users experience
-- How the system reacts
+Why this is dangerous:
+- Slow responses hold threads
+- Thread pools fill up
+- Upstream services block
 
-### Good interview signal
-> “If this dependency becomes slow, requests will pile up unless we apply backpressure.”
+This is more dangerous than a hard failure.
+
+---
+
+#### 2. Retry Amplification
+
+- One request fails
+- Multiple retries are triggered
+- Traffic multiplies
+- System overloads itself
+
+This is why retries **must be bounded and delayed**.
+
+---
+
+#### 3. Partial Data Failures
+
+Examples:
+- Order written, inventory update failed
+- Payment succeeded, confirmation message lost
+
+These are **inconsistent but real states**.
+
+---
+
+### How to Talk About Failures in Interviews
+
+Always answer:
+1. What fails?
+2. What does the user see?
+3. How does the system react?
+
+Interview-safe framing:
+> “The system remains available, but some operations are delayed or degraded.”
 
 ---
 
 ## 7. Degradation Strategies (Graceful Failure)
 
-### What degradation means
+### What Degradation Means
+
 Degradation answers:
-> “What does the system do instead of completely failing?”
+> “When things go wrong, what does the system do instead of dying?”
 
-### Common strategies
+A system that degrades gracefully **keeps user trust**.
 
-#### Read-only mode
+---
+
+### Common Degradation Patterns
+
+#### 1. Read-Only Mode
+
 - Disable writes
 - Allow reads
+- Useful during database incidents or migrations
 
-#### Stale data
-- Serve cached or slightly outdated data
-
-#### Feature shedding
-- Turn off non-critical features
-- Protect core flows
-
-#### Clear failure
-- Fast error responses
-- No partial corruption
-
-### Why this matters
-Users prefer:
-- Partial functionality
-- Over total downtime
-
-### Good interview signal
-> “I degrade non-essential features first to protect the core user journey.”
+User experience:
+- “You can view data, but cannot make changes.”
 
 ---
 
-## 8. Observability (Knowing What Is Happening)
+#### 2. Stale Data Mode
 
-### What observability means
-Observability answers:
-1. Is the system healthy?
-2. Where is it slow or broken?
-3. Why did it happen?
+- Serve cached or slightly outdated data
+- Accept eventual consistency temporarily
 
-### Metrics
-- Request rate
-- Error rate
+Why this works:
+- Many users prefer slightly old data over errors
+
+---
+
+#### 3. Feature Shedding
+
+- Turn off non-critical features
+- Protect core flows (checkout, payments, bookings)
+
+Example:
+- Recommendations off
+- Search limited
+- Checkout always on
+
+Interview line:
+> “I protect the revenue-critical path first.”
+
+---
+
+#### 4. Fast Failure with Clear Errors
+
+- Quick, explicit error responses
+- No partial success
+- No silent corruption
+
+---
+
+## 8. Observability (Knowing What Is Going Wrong)
+
+### What Observability Is NOT
+
+- Not just logs
+- Not just dashboards
+- Not just CPU metrics
+
+Observability is about **understanding system behavior**.
+
+---
+
+### The Three Pillars (In Practice)
+
+#### 1. Metrics (First Line of Defense)
+
+Key metrics to always mention:
+- Request rate (QPS)
+- Error rate (4xx / 5xx)
 - Latency percentiles (p50, p90, p99)
 - Queue depth
-- Retry count
+- Retry counts
+- Circuit breaker state
 
-### Logs
-- Structured logs
-- Correlation IDs
-- Used for debugging, not monitoring
-
-### Tracing
-- Track a request across services
-- Find the slowest dependency
-
-### Alerts
-- Based on symptoms, not CPU usage
-- Actionable alerts only
-
-### Good interview signal
-> “I monitor p99 latency and error rate to detect user-visible issues.”
+Why p99 matters:
+- Users experience tail latency, not averages
 
 ---
 
-## 9. Explicit Trade-offs and Ownership Thinking
+#### 2. Logs (For Explanation, Not Detection)
 
-### What this means
-You must clearly state:
-- What you optimized for
-- What you knowingly accepted as a downside
+- Structured logs (JSON)
+- Correlation IDs
+- Used to understand *why* something failed
+
+Good framing:
+> “Metrics tell me something is wrong; logs tell me why.”
+
+---
+
+#### 3. Distributed Tracing (Senior Signal)
+
+- Track requests across services
+- Identify slow dependencies
+- Essential in microservice architectures
+
+Mentioning tracing briefly already signals maturity.
+
+---
+
+### Alerts (Very Important)
+
+Good alerts:
+- Based on user-visible symptoms
+- Actionable
+- Low noise
+
+Bad alerts:
+- CPU > 80%
+- Memory usage alone
+
+---
+
+## 9. Consistency Decisions Under Failure
+
+### Key Idea
+
+Consistency is not global.
+It is **per data type**.
+
+You must explicitly choose where:
+- Strong consistency is required
+- Eventual consistency is acceptable
+
+---
 
 ### Examples
-- “We accept eventual consistency for speed.”
-- “We trade storage for faster reads.”
-- “We prioritize availability over freshness.”
 
-### Ownership mindset
-Think in terms of:
-- Blast radius
-- Independent services
-- Safe deployments
-- Rollbacks
+- Payments → Strong consistency
+- Inventory → Often eventual with reconciliation
+- Notifications → Eventual
+- Analytics → Eventual
 
-### Good interview signal
-> “This is a conscious trade-off, and here’s why it’s acceptable.”
+Interview-safe line:
+> “I scope consistency based on user impact and business risk.”
 
 ---
 
-## Final Mental Checklist (Use This During the Interview)
+### Handling Inconsistencies
 
-1. Who is the user and what is critical?
-2. What is the scale?
-3. What are the main access patterns?
-4. Why this data store?
-5. What is cached and where?
-6. Where is backpressure applied?
-7. What fails first?
-8. How does the system degrade?
-9. What trade-offs did I choose?
+- Idempotent APIs
+- Retry-safe operations
+- Background reconciliation jobs
+- Compensating actions (Saga pattern)
 
-If you can calmly walk through these points, you are operating at **Amazon L5 level**.
+---
+
+## 10. Trade-offs and Ownership Thinking (L5 Signal)
+
+### What This Really Means
+
+You must show that:
+- You know no design is perfect
+- You consciously chose certain downsides
+- You can defend those choices
+
+---
+
+### Common Trade-offs to State Explicitly
+
+- Availability over consistency
+- Storage cost over latency
+- Write complexity over read simplicity
+- Freshness over performance (or vice versa)
+
+---
+
+### Ownership Mindset
+
+Think about:
+- Blast radius
+- Independent deployability
+- Rollback safety
+- Operational simplicity
+
+Interview-ready line:
+> “This is a conscious trade-off, and I’m comfortable with it given the requirements.”
+
+---
+
+## Final Mental Loop (Run This When Pushed)
+
+When an interviewer challenges your design, loop through:
+1. Is this overload or failure?
+2. Where is backpressure applied?
+3. What degrades first?
+4. What does the user see?
+5. How do we observe and react?
+6. What trade-off did I choose?
+
+If you can calmly answer these, you are operating at **Amazon L5 level**.
