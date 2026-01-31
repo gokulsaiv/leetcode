@@ -1,81 +1,30 @@
-# OOP Patterns & Syntax Cheat-Sheet — Java first, then Python equivalents  
-**Single-file reference**: enums, classes, inheritance (child classes), interfaces, abstract classes & implementations, extending, and small factory/usage examples. Copy this entire file as `oop_patterns.md` and use it as your concise syntax destination.
+# OOP Code Shapes — Quick Structure Reference (Java → Python)
+
+Purpose: Fast recall of OOP syntax shapes. Minimal, crisp, working examples.  
+Use this as a structure template during interviews or coding.
 
 ---
 
-## Table of contents
-1. Java — Quick explanations + runnable examples  
-   1.1 Enum with methods  
-   1.2 Plain class and fields (POJO)  
-   1.3 Inheritance (base class → child class)  
-   1.4 Interface and multiple-interface implementation  
-   1.5 Abstract class and concrete implementation  
-   1.6 Extending classes and overriding methods  
-   1.7 Simple Factory pattern to create instances  
-   1.8 Example `Main` showing usage  
-2. Python — Equivalent patterns using `enum`, `abc`, dataclasses, and duck typing  
-   2.1 Enum with methods (`enum.Enum`)  
-   2.2 Plain class / dataclass  
-   2.3 Inheritance (base → child)  
-   2.4 Interface-like via `abc.ABC` or `typing.Protocol`  
-   2.5 Abstract base class and implementation (`abc`)  
-   2.6 Extending and overriding  
-   2.7 Simple factory function  
-   2.8 Example `if __name__ == "__main__"` showing usage  
-3. Short comparison notes (Java vs Python)
-4. Common gotchas & best practices
+# ========================
+# JAVA — OOP SHAPES
+# ========================
 
----
-
-# 1) **JAVA** — examples & notes
-
-> To compile/run: save as `Main.java` (or use the multi-file structure described in comments), then:
-> ```bash
-> javac Main.java
-> java Main
-> ```
-> (If you split classes into files use each filename appropriately.)
+## 1️⃣ Enum — basic shape
 
 ```java
-/* ===== File: Main.java =====
-   This single-file example declares multiple classes (only Main is public).
-   It demonstrates enums, classes, inheritance, interface, abstract class, factory, and usage.
-*/
-public class Main {
-    public static void main(String[] args) {
-        // Using enum
-        Direction d = Direction.NORTH;
-        System.out.println("Direction: " + d + " vector: " + d.getDx() + "," + d.getDy());
-
-        // Using factory to create vehicles
-        Vehicle car = VehicleFactory.create("car", "Toyota");
-        Vehicle bike = VehicleFactory.create("bike", "Trek");
-
-        car.start();
-        bike.start();
-
-        // Demonstrate polymorphism and interface
-        Flyer falcon = new Bird("Falcon");
-        falcon.fly();
-
-        // Abstract class usage
-        Animal dog = new Dog("Rex");
-        dog.speak();
-        dog.eat();
-
-        // Extending / overriding example
-        ElectricCar tesla = new ElectricCar("Tesla Model 3", 75);
-        tesla.start();
-        tesla.charge(10);
-    }
+enum Status {
+    NEW,
+    RUNNING,
+    DONE
 }
+```
 
-/* ===== 1.1 Enum with methods ===== */
+Enum with fields + constructor + method:
+
+```java
 enum Direction {
     NORTH(0, -1),
-    EAST(1, 0),
-    SOUTH(0, 1),
-    WEST(-1, 0);
+    EAST(1, 0);
 
     private final int dx;
     private final int dy;
@@ -85,136 +34,305 @@ enum Direction {
         this.dy = dy;
     }
 
-    public int getDx() { return dx; }
-    public int getDy() { return dy; }
+    public int dx() { return dx; }
+}
+```
 
-    public Direction opposite() {
-        switch(this) {
-            case NORTH: return SOUTH;
-            case SOUTH: return NORTH;
-            case EAST:  return WEST;
-            case WEST:  return EAST;
-            default:    return null;
-        }
+---
+
+## 2️⃣ Simple Class — base shape
+
+```java
+class User {
+    private String name;
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 }
+```
 
-/* ===== 1.2 Plain class (POJO) ===== */
-class Vehicle {
+---
+
+## 3️⃣ Child Class (Inheritance) — extends
+
+```java
+class AdminUser extends User {
+
+    public AdminUser(String name) {
+        super(name);
+    }
+
+    public void banUser() {
+        System.out.println("Ban user");
+    }
+}
+```
+
+Override method:
+
+```java
+@Override
+public String getName() {
+    return "Admin: " + super.getName();
+}
+```
+
+---
+
+## 4️⃣ Interface — shape
+
+```java
+interface Payment {
+    void pay(int amount);
+}
+```
+
+Implementation class:
+
+```java
+class CardPayment implements Payment {
+    @Override
+    public void pay(int amount) {
+        System.out.println("Paid by card: " + amount);
+    }
+}
+```
+
+Multiple interfaces:
+
+```java
+class SmartCardPayment implements Payment, Runnable {
+    public void pay(int amount) { }
+    public void run() { }
+}
+```
+
+Interface with default method:
+
+```java
+interface Logger {
+    default void log(String s) {
+        System.out.println(s);
+    }
+}
+```
+
+---
+
+## 5️⃣ Abstract Class — shape
+
+```java
+abstract class Vehicle {
+
     protected String model;
-    protected boolean running;
 
     public Vehicle(String model) {
         this.model = model;
-        this.running = false;
     }
 
-    public void start() {
-        running = true;
-        System.out.println(model + " started.");
-    }
+    public abstract void start();   // must implement
 
-    public void stop() {
-        running = false;
-        System.out.println(model + " stopped.");
+    public void stop() {            // already implemented
+        System.out.println("Stopped");
     }
-
-    public String getModel() { return model; }
 }
+```
 
-/* ===== 1.3 Inheritance (child class) ===== */
+Concrete child:
+
+```java
 class Car extends Vehicle {
-    public Car(String model) { super(model); }
 
-    // override
-    @Override
-    public void start() {
-        super.start();
-        System.out.println("Car-specific start checks passed.");
-    }
-}
-
-class Bike extends Vehicle {
-    public Bike(String model) { super(model); }
-
-    @Override
-    public void start() {
-        super.start();
-        System.out.println("Bike bell rings!");
-    }
-}
-
-/* ===== 1.4 Interface and implementing class ===== */
-interface Flyer {
-    void fly();          // implicitly public abstract
-    default void land() {
-        System.out.println("Landing (default implementation).");
-    }
-}
-
-class Bird implements Flyer {
-    private final String name;
-    public Bird(String name) { this.name = name; }
-    @Override
-    public void fly() {
-        System.out.println(name + " is flying.");
-    }
-    // land() uses default, override if needed
-}
-
-/* ===== 1.5 Abstract class and implementation ===== */
-abstract class Animal {
-    protected String name;
-    public Animal(String name) { this.name = name; }
-
-    // concrete method
-    public void eat() { System.out.println(name + " eats."); }
-
-    // abstract method (must be implemented by subclasses)
-    public abstract void speak();
-}
-
-class Dog extends Animal {
-    public Dog(String name) { super(name); }
-    @Override
-    public void speak() {
-        System.out.println(name + " says: Woof!");
-    }
-}
-
-/* ===== 1.6 Extending classes (specialization) ===== */
-class ElectricCar extends Car {
-    private int batteryKWh;
-    public ElectricCar(String model, int batteryKWh) {
+    public Car(String model) {
         super(model);
-        this.batteryKWh = batteryKWh;
     }
 
     @Override
     public void start() {
-        if (batteryKWh <= 0) {
-            System.out.println(getModel() + " won't start — battery empty.");
-        } else {
-            super.start();
-            System.out.println(getModel() + " is electric. Battery: " + batteryKWh + " kWh");
-        }
-    }
-
-    public void charge(int kWh) {
-        batteryKWh += kWh;
-        System.out.println(getModel() + " charged by " + kWh + " kWh. Now: " + batteryKWh);
+        System.out.println("Car starts");
     }
 }
+```
 
-/* ===== 1.7 Simple Factory pattern ===== */
-class VehicleFactory {
-    // factory method returns base type Vehicle
-    public static Vehicle create(String type, String model) {
-        switch(type.toLowerCase()) {
-            case "car": return new Car(model);
-            case "bike": return new Bike(model);
-            case "electric": return new ElectricCar(model, 50);
-            default: return new Vehicle(model);
-        }
+---
+
+## 6️⃣ Using Everything Together — quick demo
+
+```java
+public class Main {
+    public static void main(String[] args) {
+
+        Vehicle v = new Car("Tesla");
+        v.start();
+        v.stop();
+
+        Payment p = new CardPayment();
+        p.pay(100);
+
+        User u = new AdminUser("Alice");
+        System.out.println(u.getName());
     }
 }
+```
+
+---
+
+# ========================
+# PYTHON — OOP SHAPES
+# ========================
+
+## 1️⃣ Enum — shape
+
+```python
+from enum import Enum
+
+class Status(Enum):
+    NEW = 1
+    RUNNING = 2
+    DONE = 3
+```
+
+Enum with method:
+
+```python
+class Direction(Enum):
+    NORTH = (0, -1)
+
+    def dx(self):
+        return self.value[0]
+```
+
+---
+
+## 2️⃣ Simple Class — shape
+
+```python
+class User:
+    def __init__(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+```
+
+---
+
+## 3️⃣ Child Class — inheritance
+
+```python
+class AdminUser(User):
+
+    def __init__(self, name):
+        super().__init__(name)
+
+    def ban_user(self):
+        print("Ban user")
+```
+
+Override method:
+
+```python
+def get_name(self):
+    return "Admin: " + super().get_name()
+```
+
+---
+
+## 4️⃣ Interface Equivalent — using ABC
+
+Python has no true interface → use abstract base class.
+
+```python
+from abc import ABC, abstractmethod
+
+class Payment(ABC):
+
+    @abstractmethod
+    def pay(self, amount):
+        pass
+```
+
+Implementation:
+
+```python
+class CardPayment(Payment):
+
+    def pay(self, amount):
+        print("Paid by card:", amount)
+```
+
+---
+
+## 5️⃣ Abstract Class — shape
+
+```python
+from abc import ABC, abstractmethod
+
+class Vehicle(ABC):
+
+    def __init__(self, model):
+        self.model = model
+
+    @abstractmethod
+    def start(self):
+        pass
+
+    def stop(self):
+        print("Stopped")
+```
+
+Child implementation:
+
+```python
+class Car(Vehicle):
+
+    def start(self):
+        print("Car starts")
+```
+
+---
+
+## 6️⃣ Using Everything — demo
+
+```python
+if __name__ == "__main__":
+
+    v = Car("Tesla")
+    v.start()
+    v.stop()
+
+    p = CardPayment()
+    p.pay(100)
+
+    u = AdminUser("Alice")
+    print(u.get_name())
+```
+
+---
+
+# ========================
+# Mental Model Summary
+# ========================
+
+Java:
+- class → `class A {}`
+- child → `class B extends A`
+- interface → `interface X {}`
+- implement → `class C implements X`
+- abstract → `abstract class A`
+- enum → `enum X {}`
+
+Python:
+- class → `class A:`
+- child → `class B(A):`
+- interface → `ABC + @abstractmethod`
+- abstract → `ABC`
+- enum → `Enum`
+
+Use this file as your quick OOP syntax skeleton reference.
+```
