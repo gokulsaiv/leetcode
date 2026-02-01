@@ -1,0 +1,117 @@
+cheat sheet
+===========
+FOR MANAGER PROBLEM WHICH YOU HAVE 
+-----------------------------------
+| Concept         | Lives where            | Example                                                  |
+| --------------- | ---------------------- | -------------------------------------------------------- |
+| Entity          | Seat.java              | `reserve()` logic, `reserved` state                      |
+| Repository      | InMemorySeatRepository | `findAvailableSeats()`, storage                          |
+| Service         | ReservationService     | Business search (`searchSeatsForUser`) and reserve logic |
+| Data search     | Repository             | “Which seats are available?”                             |
+| Business search | Service                | “Which seats can THIS user actually book?”               |
+
+
+// Seat.java
+public class Seat {
+    private final String id;   // identity
+    private boolean reserved;  // state
+
+    public Seat(String id) {
+        this.id = id;
+        this.reserved = false;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public boolean isReserved() {
+        return reserved;
+    }
+
+    // Business rule: Seat can only be reserved once
+    public void reserve() {
+        if (reserved) {
+            throw new IllegalStateException("Seat already reserved!");
+        }
+        reserved = true;
+    }
+
+    public void release() {
+        reserved = false;
+    }
+}
+
+// SeatRepository.java
+import java.util.*;
+
+public interface SeatRepository {
+    Seat findById(String id);
+    void save(Seat seat);
+    List<Seat> findAll();              // returns all seats
+    List<Seat> findAvailableSeats();   // basic "data-level" search
+}
+
+// In-memory implementation
+class InMemorySeatRepository implements SeatRepository {
+    private final Map<String, Seat> store = new HashMap<>();
+
+    public Seat findById(String id) {
+        return store.get(id);
+    }
+
+    public void save(Seat seat) {
+        store.put(seat.getId(), seat);
+    }
+
+    public List<Seat> findAll() {
+        return new ArrayList<>(store.values());
+    }
+
+    public List<Seat> findAvailableSeats() {
+        List<Seat> available = new ArrayList<>();
+        for (Seat s : store.values()) {
+            if (!s.isReserved()) available.add(s);
+        }
+        return available;
+    }
+}
+
+
+// ReservationService.java
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ReservationService {
+    private final SeatRepository repo;
+
+    public ReservationService(SeatRepository repo) {
+        this.repo = repo;
+    }
+
+    // Reserve a seat for a specific user
+    public void reserveSeat(String seatId, String userId) {
+        Seat seat = repo.findById(seatId);
+        if (seat == null) {
+            throw new IllegalArgumentException("Seat not found");
+        }
+
+        // Business rule: maybe only VIP users can reserve front seats
+        if (seat.getId().startsWith("F") && !userId.startsWith("VIP")) {
+            throw new IllegalStateException("Only VIP can book front seats");
+        }
+
+        seat.reserve();     // Entity enforces single-reservation rule
+        repo.save(seat);
+    }
+
+    // Business-level search: which seats can THIS user see and book?
+    public List<Seat> searchSeatsForUser(String userId) {
+        List<Seat> available = repo.findAvailableSeats();  // repository search
+
+        // Apply business rules: filter based on user eligibility
+        return available.stream()
+                        .filter(seat -> !seat.getId().startsWith("F") || userId.startsWith("VIP"))
+                        .collect(Collectors.toList());
+    }
+}
