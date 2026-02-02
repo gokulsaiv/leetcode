@@ -1,0 +1,13 @@
+Client
+  ↓
+API Gateway
+  ↓
+Post Service → Posts DB
+  ↓
+Kafka
+  ↓
+Feed Builder
+  ↓
+Feed Store → Cache
+  ↓
+Feed Service → Client
