@@ -266,3 +266,18 @@ This design meets SysDev-2 expectations:
 - Scalable and realistic
 - No over-engineering
 
+
+Client
+  ↓
+API Gateway
+  ↓
+Post Service → Posts DB
+  ↓
+Kafka
+  ↓
+Feed Builder
+  ↓
+Feed Store → Cache
+  ↓
+Feed Service → Client
+
