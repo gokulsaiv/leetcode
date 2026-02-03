@@ -1,77 +1,67 @@
-# 🚀 L5 SysDev II / SDE II Interview Cheat Sheet
+# 🌐 SysDev II: Networking & Troubleshooting Battle Map
 
-## 1. Networking & Debugging Toolbelt
-*Use these to move from Layer 2 (Physical) to Layer 7 (Application).*
+## 1. The "Golden Commands" Cheat Sheet
+*Use these to isolate if a problem is Process, Local Network, or Remote Routing.*
 
-| Tool | Key Flags | Scenario / Use Case |
+| Command | Why it’s the L5 Choice | Common Flag / Usage |
 | :--- | :--- | :--- |
-| **`ss`** | `-tunlp` | See who is listening. Check if bound to `127.0.0.1` vs `0.0.0.0`. |
-| **`ip route`** | `get <ip>` | Check which interface/gateway the OS uses for a destination. |
-| **`nc` (netcat)**| `-zv <ip> <port>` | Fast "Port Open" check. Success = Service Up; Timeout = Firewall. |
-| **`tcpdump`** | `-i any host <ip>` | The "Truth." See if SYN is sent and if SYN-ACK comes back. |
-| **`arp` / `ip n`**| `-an` | Check Layer 2. If it's `<incomplete>`, the host is physically gone. |
-| **`traceroute`**| `-n -T -p <port>` | Find where the packet dies. `!H` means the gateway can't find the host. |
-| **`strace`** | `-p <pid>` | Trace system calls. See if a "hung" process is stuck on a file/socket. |
-| **`lsof`** | `-i :<port>` | Find exactly which PID owns a port. |
+| **`ss -tunlp`** | Faster and more detailed than `netstat`. | `-p` to see the **PID** owning the socket. |
+| **`ip route get <IP>`** | Shows exactly which interface and gateway the kernel will use. | `ip route get 10.144.35.116` |
+| **`nc -zv <IP> <Port>`** | Quickest way to check reachability. | Success = Port Open; Timeout = Firewall Drop. |
+| **`tcpdump`** | The "Truth" on the wire. | `tcpdump -i any host <IP> and port <Port> -nn` |
+| **`arp -an`** | Checks Layer 2 resolution. | If `<incomplete>`, the host is physically gone or down. |
+| **`traceroute -n -T`**| Find where the packet dies. | `-T` uses **TCP SYN** to bypass ICMP-blocking firewalls. |
+| **`strace -p <PID>`** | See if a process is stuck on a `read()`, `write()`, or `connect()`. | `strace -e network -p 1234` |
+| **`lsof -i :<Port>`** | Identifies the process blocking a specific port. | `lsof -i :6443` |
 
 ---
 
-## 2. Distributed Patterns: The Saga (L5 Depth)
-*For coordinating transactions across microservices without 2PC.*
+## 2. Troubleshooting: Failure Code Interpretation
+*When a command fails, the error message tells you where to look.*
 
-### **Core Mental Model**
-* **No Global Rollback:** You use **Compensating Transactions** (undoing $T_1$ by running $C_1$).
-* **Orchestration:** Central brain, better for complex flows (4+ steps).
-* **Choreography:** Event-driven, better for simple flows. Risks "Event Spaghetti."
+### **A. "Connection Refused"**
+* **Meaning:** The packet reached the host, but nothing is listening.
+* **The Culprit:** Process is crashed, not started, or bound to the wrong IP (e.g., `127.0.0.1` vs `0.0.0.0`).
+* **Next Move:** `ps aux` and `ss -tunlp` on the destination node.
 
-### **The "Must-Haves"**
-1. **Idempotency:** Every service must handle retries without duplicate side effects (use `Saga_ID` + `Step_ID`).
-2. **Observability:** Pass **Correlation IDs** in every header to trace the flow across services.
-3. **Timeouts:** If the Orchestrator doesn't hear back, it *must* assume failure and trigger compensation.
-4. **Semantic Locking:** Since Sagas lack isolation, mark records as `PENDING` to prevent other processes from using them.
+### **B. "Connection Timeout"**
+* **Meaning:** The packet was sent, but no response (not even a rejection) came back.
+* **The Culprit:** Usually a **Firewall** (Security Group, `iptables`, `nftables`) silently dropping packets.
+* **Next Move:** Check Cloud Security Groups and local `iptables -L -n`.
 
----
-
-## 3. Database Indexing: Performance & Trade-offs
-*Interviewers care about "Read-Heavy" vs "Write-Heavy" decisions.*
-
-| Index Type | Mechanics | Best For... | The "L5" Trade-off |
-| :--- | :--- | :--- | :--- |
-| **B+Tree** | Balanced Tree + Linked Leaves | Range queries, ID lookups. | High "Write Amplification" due to node splits. |
-| **LSM-Tree** | MemTable + SSTable (Appends) | High-volume writes (Logs/Metrics). | High "Read Amplification" (needs Bloom Filters). |
-| **Inverted** | Word -> [Document IDs] | Full-text search, Tag filtering. | Very slow to update/delete. |
-| **Composite** | Index on multiple columns | Multi-filter queries. | Must follow **Left-Prefix Rule**. Order matters! |
+### **C. "No Route to Host" / `!H`**
+* **Meaning:** The network stack doesn't know how to deliver the packet.
+* **The Culprit:** 1. Routing table is missing the destination subnet.
+  2. **ARP Failure:** The gateway for that subnet cannot find the MAC address of the host.
+* **Next Move:** `ip route` and `arping`.
 
 ---
 
-## 4. The "L5" Problem-Solving Framework
-*When asked to debug or design, follow this "Senior" path:*
+## 3. The SysDev "Deep Dive" Flowchart
+*If an interviewer says "The API is down," follow these layers:*
 
-### **Step 1: Isolate the Layer**
-* **Connection Refused?** Host is up, service is down/not listening.
-* **Connection Timeout?** Firewall (Security Group) or local `iptables` DROP.
-* **No Route to Host?** Routing table issue or ARP failure (Host is physically gone).
-
-### **Step 2: Check the "Blast Radius"**
-* If a disk is full, don't just delete logs. Check the **Log Rotation policy**.
-* If a service is slow, don't just restart it. Look at **p99 latency** and **I/O Wait**.
-
-### **Step 3: Disagree and Commit**
-* **The Story:** "My manager suggested [Manual Process], but I advocated for [Automated System] because manual processes don't scale. I built a POC to prove the value, but I committed to the team's needs during the build."
+1.  **Process Layer:** Is the binary running? (`ps`, `systemctl`)
+2.  **Socket Layer:** Is it bound to the correct port and **External IP**? (`ss -tunlp`)
+3.  **Local Firewall:** Is the host's own firewall blocking the port? (`iptables`)
+4.  **Network Path:** Is there a route? (`ip route`, `traceroute`)
+5.  **Layer 2:** Can the gateway see the hardware? (`arp -an`)
+6.  **The Wire:** Use `tcpdump`. If you see **SYN** going out but no **SYN-ACK** coming back, it’s a drop in the middle.
 
 ---
 
-## 5. Critical Interview Scenarios
+## 4. Key "L5" Scenarios to Master
 
-### **Scenario: "No route to host"**
-1. **Check Routing:** `ip route get <dest>`.
-2. **Check ARP:** `arp -an`. If incomplete, the host isn't responding to Layer 2.
-3. **Traceroute:** Find the last responding hop. If it ends in `!H`, that gateway can't find the host.
+### **Scenario: The "Silent Drop"**
+* **Symptoms:** `ping` works, but `nc` or `curl` times out.
+* **Explanation:** High-level firewalls often allow ICMP (ping) for debugging but block TCP on specific ports (6443/80/443).
+* **Fix:** Verify Security Group rules for the specific TCP port.
 
-### **Scenario: "Thundering Herd"**
-* **Problem:** 10,000 clients retry a failed connection at the exact same time, crashing the DB.
-* **Fix:** Implement **Exponential Backoff with Jitter**.
+### **Scenario: Port Exhaustion**
+* **Symptoms:** "Cannot assign requested address" or "Connection refused" under high load.
+* **Explanation:** The system has too many sockets in `TIME_WAIT` and ran out of ephemeral ports.
+* **Fix:** Check `cat /proc/sys/net/ipv4/ip_local_port_range`. Suggest **Connection Pooling** in the application logic.
 
-### **Scenario: "The Zombie Process"**
-* **Problem:** `ps` shows a process that won't die.
-* **Analysis:** It's likely in **Uninterruptible Sleep (D state)**, waiting on dead NFS/Disk I/O. `kill -9` won't work; you must fix the underlying I/O.
+### **Scenario: Asymmetric Routing**
+* **Symptoms:** `tcpdump` shows the packet arriving at the Node, but the client never gets a response.
+* **Explanation:** The packet comes in via `Gateway A`, but the Node's routing table sends the response back via `Gateway B`, which the client or firewall rejects as invalid.
+* **Fix:** Ensure symmetric routing or check "Reverse Path Filtering" (`rp_filter`) settings in sysctl.
