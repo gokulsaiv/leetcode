@@ -1,0 +1,7 @@
+Start with seat locking: Explain that each seat lock is tied to a unique reservation ID. No ID means no valid lock. If a retry occurs, you re-check that ID and state. If it’s already locked by you, great! If not, you don’t double-lock.
+
+Payment callback: Stress that payment confirmation is idempotent. It doesn’t matter if the payment system sends a “success” once or thrice; you check if the reservation is already confirmed before acting.
+
+Compensation on failure: If a seat lock fails or the payment is denied, describe your rollback. You iterate over all previously locked seats under that reservation ID and release them back to available.
+
+Timeout or abandonment: If users go AWOL, a background process checks if locks have expired (time-to-live, or TTL). Expired locks revert back to available seats.
