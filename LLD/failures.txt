@@ -5,3 +5,5 @@ Payment callback: Stress that payment confirmation is idempotent. It doesn’t m
 Compensation on failure: If a seat lock fails or the payment is denied, describe your rollback. You iterate over all previously locked seats under that reservation ID and release them back to available.
 
 Timeout or abandonment: If users go AWOL, a background process checks if locks have expired (time-to-live, or TTL). Expired locks revert back to available seats.
+
+Of course! Here's your pocket-sized summary: The unique reservation ID ties each booking attempt to a specific user’s transaction, ensuring that when you roll back, you only undo seats belonging to that same transaction. It prevents accidental interference with other users' bookings, keeping everything fair, isolated, and safe to retry.
