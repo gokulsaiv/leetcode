@@ -1,0 +1,51 @@
+class Solution {
+    // Function to find number of strongly connected components in the graph
+    public void topoSort(int node , ArrayList<ArrayList<Integer>> adj , boolean[] vis,Stack<Integer> stack){
+        vis[node] = true;
+        for(int n : adj.get(node)){
+            if(!vis[n])topoSort(n,adj,vis,stack);
+        }
+        stack.push(node);
+    }
+    public void dfs(int node , ArrayList<ArrayList<Integer>> adj_reverse , boolean[] vis){
+        vis[node] = true;
+        for(int n : adj_reverse.get(node)){
+            if(!vis[n])dfs(n,adj_reverse,vis);
+        }
+    }
+    public int kosaraju(int V, int[][] edges) {
+        // code here
+        Stack<Integer> stack = new Stack<>();
+        ArrayList<ArrayList<Integer>> adj = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> adj_reverse = new ArrayList<>();
+        int scc = 0;
+        boolean[] vis = new boolean[V];
+        for(int i =0 ; i < V ; i++){
+            adj.add(new ArrayList<>());
+            adj_reverse.add(new ArrayList<>());
+        }
+        for(int i =0 ; i < edges.length ; i++){
+            int u = edges[i][0];
+            int v = edges[i][1];
+            adj.get(u).add(v);
+            adj_reverse.get(v).add(u);
+            
+        }
+        
+        
+        for(int i = 0 ; i < V ; i++){
+            if(!vis[i]){
+                topoSort(i,adj,vis,stack);
+            }
+        }
+        vis = new boolean[V];
+        while(!stack.isEmpty()){
+            int node = stack.pop();
+            if(!vis[node]){
+                scc++;
+                dfs(node , adj_reverse , vis);
+            }
+        }
+        return scc;
+    }
+}
