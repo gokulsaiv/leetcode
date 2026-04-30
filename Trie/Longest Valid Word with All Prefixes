@@ -1,0 +1,62 @@
+class Trie {
+    Trie[] node = new Trie[26];
+    boolean flag = false;
+    Trie(){
+        
+    }
+    
+}
+class Solution {
+    public String longestValidWord(String[] words) {
+        // code here
+        Trie head = new Trie();
+        String ans = "";
+        //  inserting all strigs into trie
+        
+        for( int i = 0 ; i < words.length ; i++){
+           insert(head,words[i]);
+        }
+        
+        for( int i = 0 ; i < words.length ; i++){
+            
+           if(traverse(head , words[i])){
+               
+              if (words[i].length() > ans.length()) {
+            ans = words[i];
+            } 
+            // Priority 2: If they are the SAME length, pick the alphabetically smaller one
+            else if (words[i].length() == ans.length() && words[i].compareTo(ans) < 0) {
+                ans = words[i];
+            }
+           }
+        }
+        return ans;
+        
+    }
+    public void insert(Trie head , String word){
+         Trie chead = head;
+            for( int j = 0 ; j < word.length() ; j ++){
+                if(chead.node[word.charAt(j) -'a']  == null){
+                    Trie n = new Trie();
+                    chead.node[word.charAt(j) -'a'] = n;
+                    
+                }
+                chead = chead.node[word.charAt(j) -'a'];
+            }
+            chead.flag = true;
+    }
+    
+    public boolean traverse(Trie head ,String word){
+        Trie chead = head;
+        for( int j = 0 ; j < word.length() ; j ++){
+            chead  = chead.node[word.charAt(j) -'a'];
+            if(!chead.flag)return false;
+        }
+        // true complete string condition
+        if(chead.flag)return true;
+        
+        return false;
+    }
+    
+    }
+
