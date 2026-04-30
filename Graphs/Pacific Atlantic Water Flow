@@ -1,0 +1,55 @@
+import java.util.*;
+
+class Solution {
+    // Structure kept exactly as you requested
+    public void dfs(int i, int j, boolean[][] vis, int[][] heights) {
+        vis[i][j] = true;
+
+        // Move Down
+        if (i != heights.length - 1 && heights[i+1][j] >= heights[i][j] && !vis[i+1][j]) 
+            dfs(i + 1, j, vis, heights);
+
+        // Move Up
+        if (i != 0 && heights[i-1][j] >= heights[i][j] && !vis[i-1][j]) 
+            dfs(i - 1, j, vis, heights);
+
+        // Move Right
+        if (j != heights[0].length - 1 && heights[i][j+1] >= heights[i][j] && !vis[i][j+1]) 
+            dfs(i, j + 1, vis, heights);
+
+        // Move Left
+        if (j != 0 && heights[i][j-1] >= heights[i][j] && !vis[i][j-1]) 
+            dfs(i, j - 1, vis, heights);
+    }
+
+    public List<List<Integer>> pacificAtlantic(int[][] heights) {
+        if (heights == null || heights.length == 0) return new ArrayList<>();
+        
+        int n = heights.length;
+        int m = heights[0].length;
+        boolean[][] pacific = new boolean[n][m]; 
+        boolean[][] atlantic = new boolean[n][m];
+
+        // Corrected Loop 1: Handle Vertical Edges (Left/Right)
+        for (int i = 0; i < n; i++) {
+            if (!pacific[i][0]) dfs(i, 0, pacific, heights);
+            if (!atlantic[i][m - 1]) dfs(i, m - 1, atlantic, heights);
+        }
+
+        // Corrected Loop 2: Handle Horizontal Edges (Top/Bottom)
+        for (int j = 0; j < m; j++) {
+            if (!pacific[0][j]) dfs(0, j, pacific, heights);
+            if (!atlantic[n - 1][j]) dfs(n - 1, j, atlantic, heights);
+        }
+
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (pacific[i][j] && atlantic[i][j]) {
+                    ans.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        return ans;
+    }
+}
