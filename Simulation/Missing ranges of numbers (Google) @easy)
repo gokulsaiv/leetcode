@@ -1,0 +1,31 @@
+class Solution {
+    public List<List<Integer>> missingRanges(int[] arr, int lower, int upper) {
+        // code here
+        List<List<Integer>> ans = new ArrayList<>();
+        int currentNum = lower , prevNum = lower-1;
+        
+        for(int i = 0 ; i < arr.length ; i++){
+            if(currentNum == arr[i]){
+                prevNum = arr[i];
+                currentNum = prevNum + 1;
+            }
+            else {
+                List<Integer> l = new ArrayList<>();
+                l.add(prevNum+1);
+                l.add(arr[i]-1);
+                ans.add(l);
+                prevNum = arr[i];
+                currentNum = prevNum + 1;
+                
+            }
+        }
+        if(arr[arr.length-1]<upper){
+            List<Integer> l = new ArrayList<>();
+            l.add(arr[arr.length-1]+1);
+            l.add(upper);
+            ans.add(l);
+        }
+        return ans;
+    }
+}
+
