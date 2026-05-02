@@ -1,0 +1,20 @@
+class Solution {
+    public double averageWaitingTime(int[][] customers) {
+
+        int lastDishFinishedAt = 1 ;
+        long totalWaitTime = 0 ;
+        for( int i = 0 ; i  < customers.length ; i++){
+            int arriaval = customers[i][0];
+            int dishPrepTime  = customers[i][1];
+            if(lastDishFinishedAt <= arriaval){
+                lastDishFinishedAt = arriaval;
+            }
+            int currentDishFinishTIme = lastDishFinishedAt + dishPrepTime;
+            int waiting  = currentDishFinishTIme - arriaval;
+            totalWaitTime = totalWaitTime + waiting;
+            lastDishFinishedAt = currentDishFinishTIme;
+
+        }
+        return (double)totalWaitTime/customers.length;
+    }
+}
