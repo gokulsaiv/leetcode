@@ -1,0 +1,66 @@
+class CustomStack {
+    Node head;
+    Node tail;
+    int capacity;
+    public CustomStack(int maxSize) {
+        this.capacity = maxSize;
+        this.head = new Node(-1);
+        this.tail = new Node(-1);
+        head.next = tail;
+        tail.prev = head;
+
+    }
+    
+    public void push(int x) {
+        Node n =  new Node(x);
+        if(capacity - 1 >= 0){
+            insertNewNode(n);
+            capacity--;
+
+        }
+
+    }
+    public void insertNewNode(Node n){
+        n.next = head.next;
+        n.prev = head;
+        head.next.prev = n;
+        head.next = n;
+    }
+    
+    public int pop() {
+        int val =  -1;
+        if(head.next != tail){
+            val = head.next.val;
+            head.next.next.prev = head;
+            head.next = head.next.next;
+            capacity++;
+        }
+        return val;
+    }
+    
+    public void increment(int k, int val) {
+        Node temp = tail.prev;
+        while(temp != head && k > 0){
+            int current = temp.val;
+            temp.val = current + val;
+            temp = temp.prev;
+            k--;
+        }
+    }
+}
+class Node{
+    int val;
+    Node next = null;
+    Node prev = null;
+    Node(int val){
+        this.val = val;
+    }
+}
+
+/**
+ * Your CustomStack object will be instantiated and called as such:
+ * CustomStack obj = new CustomStack(maxSize);
+ * obj.push(x);
+ * int param_2 = obj.pop();
+ * obj.increment(k,val);
+ */
