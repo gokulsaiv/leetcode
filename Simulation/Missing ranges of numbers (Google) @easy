@@ -1,4 +1,4 @@
-https://www.geeksforgeeks.org/problems/missing-ranges-of-numbers1019/1
+# [Missing Ranges of Numbers](https://www.geeksforgeeks.org/problems/missing-ranges-of-numbers1019/1)
 
 class Solution {
     public List<List<Integer>> missingRanges(int[] arr, int lower, int upper) {
@@ -30,6 +30,3 @@ class Solution {
         return ans;
     }
 }
-
-
-
