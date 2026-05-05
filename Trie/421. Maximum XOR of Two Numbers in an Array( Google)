@@ -1,0 +1,48 @@
+class Solution {
+    Trie head;
+
+    public void insertIntoTrie(int nums){
+        Trie chead = head;
+        for(int j = 31 ; j >= 0 ; j--){
+            int bit = (nums >> j) & 1;
+            
+            if(chead.node[bit] == null){
+                Trie n = new Trie();
+                chead.node[bit] = n;
+            }
+            chead = chead.node[bit];
+        }
+        
+    }
+    public int findMaximum(int num){
+        Trie chead = head;
+        int res = 0;
+        for(int i = 31 ; i >= 0 ; i --){
+            int bit = (num >> i) & 1;
+            int compliment = bit ^ 1;
+            if(chead.node[compliment] != null){
+                res = res + (int)Math.pow(2,i);
+                chead = chead.node[compliment];
+            }
+            else{
+                
+               chead = chead.node[bit];
+            }
+        }
+        return res;
+    }
+    public int findMaximumXOR(int[] nums) {
+        head =  new Trie();
+        int max = 0;
+        for(int i = 0 ; i < nums.length ; i++){
+            insertIntoTrie(nums[i]);
+        }
+         for(int i = 0 ; i < nums.length ; i++){
+            max = Math.max(max,findMaximum(nums[i]));
+        }
+        return max;
+    }
+}
+class Trie { 
+    Trie[] node = new Trie[2];
+}
