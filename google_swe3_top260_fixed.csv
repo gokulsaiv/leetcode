@@ -69,7 +69,7 @@ ID,URL,Title,Difficulty,Acceptance %,Frequency %,Frequency,Weight,PriorityScore,
 322,https://leetcode.com/problems/coin-change,Coin Change,Medium,47.9%,37.5%,37.5,2,75.0,No
 757,https://leetcode.com/problems/set-intersection-size-at-least-two,Set Intersection Size At Least Two,Hard,57.9%,25.0%,25.0,3,75.0,No
 48,https://leetcode.com/problems/rotate-image,Rotate Image,Medium,79.3%,37.5%,37.5,2,75.0,No
-279,https://leetcode.com/problems/perfect-squares,Perfect Squares,Medium,56.3%,37.5%,37.5,2,75.0,No
+279,https://leetcode.com/problems/perfect-squares,Perfect Squares,Medium,56.3%,37.5%,37.5,2,75.0,Yes
 1192,https://leetcode.com/problems/critical-connections-in-a-network,Critical Connections in a Network,Hard,59.3%,25.0%,25.0,3,75.0,No
 1044,https://leetcode.com/problems/longest-duplicate-substring,Longest Duplicate Substring,Hard,31.1%,25.0%,25.0,3,75.0,No
 1349,https://leetcode.com/problems/maximum-students-taking-exam,Maximum Students Taking Exam,Hard,53.4%,25.0%,25.0,3,75.0,No
