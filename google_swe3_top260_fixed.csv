@@ -243,7 +243,7 @@ ID,URL,Title,Difficulty,Acceptance %,Frequency %,Frequency,Weight,PriorityScore,
 852,https://leetcode.com/problems/peak-index-in-a-mountain-array,Peak Index in a Mountain Array,Medium,66.9%,25.0%,25.0,2,50.0,No
 1877,https://leetcode.com/problems/minimize-maximum-pair-sum-in-array,Minimize Maximum Pair Sum in Array,Medium,83.3%,25.0%,25.0,2,50.0,No
 136,https://leetcode.com/problems/single-number,Single Number,Easy,77.3%,50.0%,50.0,1,50.0,No
-143,https://leetcode.com/problems/reorder-list,Reorder List,Medium,64.6%,25.0%,25.0,2,50.0,No
+143,https://leetcode.com/problems/reorder-list,Reorder List,Medium,64.6%,25.0%,25.0,2,50.0,Yes
 148,https://leetcode.com/problems/sort-list,Sort List,Medium,63.8%,25.0%,25.0,2,50.0,No
 150,https://leetcode.com/problems/evaluate-reverse-polish-notation,Evaluate Reverse Polish Notation,Medium,57.0%,25.0%,25.0,2,50.0,No
 181,https://leetcode.com/problems/employees-earning-more-than-their-managers,Employees Earning More Than Their Managers,Easy,72.8%,50.0%,50.0,1,50.0,No
