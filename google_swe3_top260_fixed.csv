@@ -131,7 +131,7 @@ ID,URL,Title,Difficulty,Acceptance %,Frequency %,Frequency,Weight,PriorityScore,
 2534,https://leetcode.com/problems/time-taken-to-cross-the-door,Time Taken to Cross the Door,Hard,50.1%,25.0%,25.0,3,75.0,No
 57,https://leetcode.com/problems/insert-interval,Insert Interval,Medium,44.7%,37.5%,37.5,2,75.0,No
 2872,https://leetcode.com/problems/maximum-number-of-k-divisible-components,Maximum Number of K-Divisible Components,Hard,74.1%,25.0%,25.0,3,75.0,No
-137,https://leetcode.com/problems/single-number-ii,Single Number II,Medium,66.7%,37.5%,37.5,2,75.0,No
+137,https://leetcode.com/problems/single-number-ii,Single Number II,Medium,66.7%,37.5%,37.5,2,75.0,Yes
 176,https://leetcode.com/problems/second-highest-salary,Second Highest Salary,Medium,46.3%,37.5%,37.5,2,75.0,No
 50,https://leetcode.com/problems/powx-n,"Pow(x, n)",Medium,38.2%,37.5%,37.5,2,75.0,No
 212,https://leetcode.com/problems/word-search-ii,Word Search II,Hard,38.1%,25.0%,25.0,3,75.0,No
