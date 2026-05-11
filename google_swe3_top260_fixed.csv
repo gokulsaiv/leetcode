@@ -258,4 +258,4 @@ ID,URL,Title,Difficulty,Acceptance %,Frequency %,Frequency,Weight,PriorityScore,
 1292,https://leetcode.com/problems/maximum-side-length-of-a-square-with-sum-less-than-or-equal-to-threshold,Maximum Side Length of a Square with Sum Less than or Equal to Threshold,Medium,65.5%,25.0%,25.0,2,50.0,No
 416,https://leetcode.com/problems/partition-equal-subset-sum,Partition Equal Subset Sum,Medium,49.2%,25.0%,25.0,2,50.0,No
 438,https://leetcode.com/problems/find-all-anagrams-in-a-string,Find All Anagrams in a String,Medium,53.3%,25.0%,25.0,2,50.0,No
-443,https://leetcode.com/problems/string-compression,String Compression,Medium,59.5%,25.0%,25.0,2,50.0,No
+443,https://leetcode.com/problems/string-compression,String Compression,Medium,59.5%,25.0%,25.0,2,50.0,Yes
