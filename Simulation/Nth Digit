@@ -1,0 +1,42 @@
+// i figured it fount but not able to get the logic right i was 90% there 
+class Solution {
+    public int findNthDigit(int n) {
+
+        if(n <= 9) return n;
+
+        int digit_len = 1, power = 0;
+        long residue = 0;
+
+        while(true){
+
+            long range_start = 1L * (long)Math.pow(10, power);
+            long range_end = 9L * (long)Math.pow(10, power);
+
+            // CHANGED:
+            // compare against total digits in this block
+            long total_digits = range_end * digit_len;
+
+            // CHANGED:
+            // check using remaining digits after residue
+            if(n - residue <= total_digits) break;
+
+            // CHANGED:
+            // residue must store DIGITS consumed, not numbers
+            residue = residue + total_digits;
+
+            power++;
+            digit_len++;
+        }
+
+        int starting_num = (int)Math.pow(10, power);
+
+        // same logic, now residue is correct
+        int num = (int)((n - residue - 1) / digit_len) + starting_num;
+
+        int pos = (int)((n - residue - 1) % digit_len);
+
+        char s = Integer.toString(num).charAt(pos);
+
+        return s - '0';
+    }
+}
