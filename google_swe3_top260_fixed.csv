@@ -212,7 +212,7 @@ ID,URL,Title,Difficulty,Acceptance %,Frequency %,Frequency,Weight,PriorityScore,
 498,https://leetcode.com/problems/diagonal-traverse,Diagonal Traverse,Medium,67.0%,25.0%,25.0,2,50.0,No
 400,https://leetcode.com/problems/nth-digit,Nth Digit,Medium,37.1%,25.0%,25.0,2,50.0,No
 523,https://leetcode.com/problems/continuous-subarray-sum,Continuous Subarray Sum,Medium,31.2%,25.0%,25.0,2,50.0,No
-707,https://leetcode.com/problems/design-linked-list,Design Linked List,Medium,29.8%,25.0%,25.0,2,50.0,No
+707,https://leetcode.com/problems/design-linked-list,Design Linked List,Medium,29.8%,25.0%,25.0,2,50.0,Yes
 692,https://leetcode.com/problems/top-k-frequent-words,Top K Frequent Words,Medium,60.0%,25.0%,25.0,2,50.0,No
 2749,https://leetcode.com/problems/minimum-operations-to-make-the-integer-zero,Minimum Operations to Make the Integer Zero,Medium,58.2%,25.0%,25.0,2,50.0,No
 2327,https://leetcode.com/problems/number-of-people-aware-of-a-secret,Number of People Aware of a Secret,Medium,60.9%,25.0%,25.0,2,50.0,No
