@@ -1,0 +1,23 @@
+class Solution {
+    int dp[][];
+    public int solver(int i , int j , int[] arr){
+       
+        if(i == j)return 0;
+        if(dp[i][j]!= -1)return dp[i][j];
+        int min = Integer.MAX_VALUE;
+        for(int k = i; k < j  ; k++){
+            int steps = (arr[i-1] * arr[k] * arr[j]) + solver(i,k,arr) + solver(k+1,j,arr);
+            //  System.out.println(i + " " + j + " " + steps) ;
+            min = Math.min(min,steps);
+        }
+        return dp[i][j] = min;
+    }
+    public int matrixMultiplication(int arr[]) {
+        int n = arr.length;
+        dp = new int[n][n];
+        // code here
+        for(int i = 0 ; i < dp.length ; i++)Arrays.fill(dp[i],-1);
+        if(arr.length == 2)return 0;
+        return solver(1,arr.length-1,arr);
+    }
+}
