@@ -1,0 +1,27 @@
+class Solution {
+    public Node flattener(Node head){
+
+        Node temp = head;
+        Node prev =  null;
+        while(temp!=null){
+            if(temp.child!=null){
+                Node tail  = flattener(temp.child);
+                Node next = temp.next;
+                temp.next = temp.child;
+                temp.child.prev = temp;
+                temp.child = null;
+                tail.next = next;
+                if(next!=null)next.prev = tail;
+                
+            }
+            prev = temp;
+            temp = temp.next;
+        }
+        return prev;
+    }
+
+    public Node flatten(Node head) {
+        flattener(head);
+        return head;
+    }
+}
