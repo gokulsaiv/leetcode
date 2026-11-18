@@ -1,0 +1,21 @@
+class Logger {
+    Map<String,Integer> log_tracker;
+    public Logger() {
+        this.log_tracker = new HashMap<>();
+    }
+    
+    public boolean shouldPrintMessage(int timestamp, String message) {
+        if(!log_tracker.containsKey(message)){
+            log_tracker.put(message,timestamp+10);
+            return true;
+        }
+        else{
+            int allowed_time = log_tracker.get(message);
+            if(timestamp >= allowed_time){
+                log_tracker.put(message,timestamp+10);
+                return true;
+            }
+        }
+        return false;
+    }
+}
